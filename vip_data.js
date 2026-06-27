@@ -1,6 +1,6 @@
 // VIP Units: 45, Questions: 3281
-
-  {
+const VIP_UNITS = [
+{
     id: 12,
     name: '套题1',
     vip: true,
@@ -3596,3 +3596,4 @@
       { id: 73, q: '全面依法治国是坚持和发展中国特色社会主义的本质要求和重要保障。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 }
     ]
   },
+];

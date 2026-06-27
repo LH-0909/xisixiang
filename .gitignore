@@ -20,8 +20,8 @@ _docx_*
 # 其他排除
 __pycache__/
 missing_answers.txt
-index.html
 *.pyc
 docs/
 build.js
 vip_data_clean.js
+题库/*.html (except main)

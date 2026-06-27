@@ -13,6 +13,12 @@ function goHome() { go('home'); renderHomeData(); }
 function goUnit(uid) { go('unit'); unitPage.start(uid); }
 function goWrong() { go('wrong'); wrongPage.start(); }
 
+// Helper: find unit by ID across both regular and VIP
+function findUnit(uid) {
+  return UNITS.find(function(u) { return u.id === uid; }) ||
+         (typeof VIP_UNITS !== 'undefined' ? VIP_UNITS.find(function(u) { return u.id === uid; }) : undefined);
+}
+
 // Hash routing
 window.addEventListener('hashchange', function() {
   var h = location.hash;
@@ -37,6 +43,25 @@ function renderHomeData() {
     grid.appendChild(card);
   });
 
+  // VIP section
+  if (typeof VIP_UNITS !== 'undefined' && VIP_UNITS.length > 0) {
+    var vipTotal = 0;
+    VIP_UNITS.forEach(function(u) { vipTotal += u.questions.length; });
+    var vipSection = document.getElementById('vip-section');
+    if (vipSection) {
+      document.getElementById('vip-total-count').textContent = vipTotal;
+      var vipGrid = document.getElementById('vip-grid');
+      vipGrid.innerHTML = '';
+      VIP_UNITS.forEach(function(unit) {
+        var card = document.createElement('div');
+        card.className = 'unit-card vip-card';
+        (function(uid) { card.onclick = function() { goUnit(uid); }; })(unit.id);
+        card.innerHTML = '<div class="unit-num vip-num">' + unit.id + '</div><div class="unit-title">' + unit.name + '</div><div class="unit-count">' + unit.questions.length + ' 道题</div>';
+        vipGrid.appendChild(card);
+      });
+    }
+  }
+
   var allWrong = getAllWrongQuestions();
   var wc = document.getElementById('wrong-count');
   wc.textContent = allWrong.length > 0 ? allWrong.length + ' 道错题待复习' : '暂无错题 ✓';
@@ -50,7 +75,7 @@ var unitPage = (function() {
   var letters = 'ABCDEFGHIJ';
 
   function init(uid) {
-    unit = UNITS.find(function(u) { return u.id === uid; });
+    unit = findUnit(uid);
     if (!unit) { goHome(); return; }
     mode = 'practice';
     userAnswers = {}; submitted = {}; skipped = {};
@@ -384,7 +409,7 @@ var wrongPage = (function() {
     document.getElementById('w-btn-clear').style.display = 'inline-flex';
     var grouped = {};
     allW.forEach(function(w) {
-      var unit = UNITS.find(function(u) { return u.id === w.unitId; });
+      var unit = findUnit(w.unitId);
       var uname = unit ? unit.name : '未知';
       if (!grouped[uname]) grouped[uname] = [];
       var q = unit ? unit.questions.find(function(q) { return q.id === w.questionId; }) : null;
@@ -407,7 +432,7 @@ var wrongPage = (function() {
   function buildQs() {
     var result = [];
     getAllWrongQuestions().forEach(function(w) {
-      var unit = UNITS.find(function(u) { return u.id === w.unitId; });
+      var unit = findUnit(w.unitId);
       if (!unit) return;
       var q = unit.questions.find(function(q) { return q.id === w.questionId; });
       if (q) {

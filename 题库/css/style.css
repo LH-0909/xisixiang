@@ -144,6 +144,20 @@ body {
   color: #fff;
 }
 
+/* VIP cards */
+.unit-card.vip-card {
+  border-color: #B71C1C;
+  background: linear-gradient(135deg, #FFF8F8, #FFEBEE);
+}
+.unit-card.vip-card:hover {
+  border-color: #8B0000;
+  box-shadow: 0 4px 16px rgba(139, 0, 0, 0.15);
+}
+.unit-card .vip-num {
+  background: linear-gradient(135deg, #8B0000, #C41E3A);
+  color: #fff;
+}
+
 /* === Mode Selection === */
 .mode-select {
   display: flex;
