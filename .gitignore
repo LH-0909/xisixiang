@@ -25,3 +25,6 @@ docs/
 build.js
 vip_data_clean.js
 题库/*.html (except main)
+题库/index.html
+题库/unit.html
+题库/wrong-book.html
