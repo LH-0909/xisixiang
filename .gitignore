@@ -1,0 +1,27 @@
+# 截图和OCR（体积大，非运行必需）
+45套习思想/
+ocr_output/
+
+# Word文档
+*.docx
+
+# Python临时脚本
+*.py
+
+# Claude配置
+.claude/
+
+# 临时文件
+*_temp*
+fix_*.js
+verify_*.js
+补全*.js
+_docx_*
+# 其他排除
+__pycache__/
+missing_answers.txt
+index.html
+*.pyc
+docs/
+build.js
+vip_data_clean.js

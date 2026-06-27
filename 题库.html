@@ -1,0 +1,1966 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>习思想题库</title>
+<style>
+/* === 习思想题库系统 - 全局样式 === */
+
+:root {
+  --primary: #8B0000;
+  --primary-light: #C41E3A;
+  --gold: #DAA520;
+  --gold-light: #F0E68C;
+  --bg: #FFF8F0;
+  --card-bg: #FFFFFF;
+  --text: #2C1810;
+  --text-light: #666;
+  --border: #E0D5C1;
+  --success: #2E7D32;
+  --error: #C62828;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --radius: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.8;
+  font-size: 17px;
+}
+
+/* === Header === */
+.app-header {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff;
+  padding: 20px 0;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.app-header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.app-header .subtitle {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  margin-top: 4px;
+}
+
+/* === Navigation === */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 76px;
+  z-index: 99;
+}
+
+.nav-back {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+.nav-back:hover { opacity: 0.7; }
+
+/* === Container === */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+
+/* === Unit Cards === */
+.unit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 20px 0;
+}
+
+.unit-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 2px solid transparent;
+  text-decoration: none;
+  color: var(--text);
+  display: block;
+}
+
+.unit-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  border-color: var(--primary-light);
+}
+
+.unit-card .unit-num {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.unit-card .unit-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.unit-card .unit-count {
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+.unit-card.special {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff;
+  border-color: transparent;
+}
+
+.unit-card.special .unit-num,
+.unit-card.special .unit-title,
+.unit-card.special .unit-count {
+  color: #fff;
+}
+
+/* === Mode Selection === */
+.mode-select {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.mode-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 14px 20px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  font-family: inherit;
+  color: var(--text);
+}
+
+.mode-btn:hover {
+  border-color: var(--primary-light);
+  background: #FFF5F5;
+}
+
+.mode-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.mode-btn .icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+
+/* === Question Card === */
+.question-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.question-num {
+  display: inline-block;
+  background: var(--primary);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+
+.question-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+  line-height: 1.8;
+}
+
+/* === Options === */
+.options-list {
+  list-style: none;
+}
+
+.option-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.option-item:hover {
+  background: #FFF5F5;
+  border-color: var(--primary-light);
+}
+
+.option-item.selected {
+  background: #FFF0F0;
+  border-color: var(--primary);
+}
+
+.option-item.correct {
+  background: #E8F5E9;
+  border-color: var(--success);
+  color: #1B5E20;
+}
+
+.option-item.wrong {
+  background: #FFEBEE;
+  border-color: var(--error);
+  color: #B71C1C;
+}
+
+.option-item.disabled {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.option-letter {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #F5F5F5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.option-item.selected .option-letter { background: var(--primary); color: #fff; }
+.option-item.correct .option-letter { background: var(--success); color: #fff; }
+.option-item.wrong .option-letter { background: var(--error); color: #fff; }
+
+.option-text { flex: 1; padding-top: 4px; }
+
+/* === Feedback === */
+.feedback {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+  font-weight: 600;
+  display: none;
+}
+
+.feedback.show { display: block; }
+
+.feedback.correct-fb {
+  background: #E8F5E9;
+  color: #2E7D32;
+  border-left: 4px solid var(--success);
+}
+
+.feedback.wrong-fb {
+  background: #FFEBEE;
+  color: #C62828;
+  border-left: 4px solid var(--error);
+}
+
+/* === Bottom Bar === */
+.bottom-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  gap: 12px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-primary:hover { background: var(--primary-light); }
+
+.btn-outline {
+  background: #fff;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+.btn-outline:hover { background: #FFF5F5; }
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* === Progress Bar === */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-light);
+  margin-bottom: 12px;
+}
+
+/* === Result Summary === */
+.result-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 32px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+
+.result-score {
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 16px 0;
+}
+
+.result-detail {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.result-item {
+  padding: 12px;
+  border-radius: 8px;
+  background: #F8F8F8;
+}
+
+.result-item .num {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.result-item .label {
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+/* === Sidebar === */
+.layout {
+  display: flex;
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+
+.main-area {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 140px;
+  align-self: flex-start;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 12px;
+  transition: width 0.3s;
+}
+
+.sidebar.collapsed {
+  width: 44px;
+  padding: 8px;
+}
+
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 4px 0 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--primary);
+  user-select: none;
+}
+
+.sidebar.collapsed .sidebar-toggle span { display: none; }
+.sidebar.collapsed .sidebar-grid { display: none; }
+
+.sidebar-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.sidebar-num {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 2px solid var(--border);
+  transition: all 0.15s;
+  background: #fafafa;
+}
+
+.sidebar-num:hover { border-color: var(--primary-light); background: #FFF5F5; }
+.sidebar-num.current { background: var(--primary); color: #fff; border-color: var(--primary); }
+.sidebar-num.answered { background: #E8F5E9; border-color: var(--success); color: #2E7D32; }
+.sidebar-num.skipped { background: #FFF8E1; border-color: #F9A825; color: #F57F17; }
+
+.sidebar-legend {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sidebar-legend span { display: flex; align-items: center; gap: 3px; }
+
+.legend-dot {
+  width: 12px; height: 12px; border-radius: 3px; display: inline-block;
+}
+.legend-dot.cur { background: var(--primary); }
+.legend-dot.ans { background: #E8F5E9; border: 1px solid var(--success); }
+.legend-dot.skip { background: #FFF8E1; border: 1px solid #F9A825; }
+.legend-dot.unans { background: #fafafa; border: 1px solid var(--border); }
+
+/* === Multi-select checkmark === */
+.option-item .checkmark {
+  width: 20px; height: 20px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  margin-right: 4px;
+}
+
+.option-item.selected .checkmark {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.option-item.selected .checkmark::after {
+  content: '✓';
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.option-item.correct .checkmark {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.option-item.correct .checkmark::after {
+  content: '✓';
+  color: #fff;
+  font-size: 0.8rem;
+}
+
+.option-item.wrong .checkmark {
+  background: var(--error);
+  border-color: var(--error);
+}
+
+/* === Question type badge === */
+.type-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.type-badge.single { background: #E3F2FD; color: #1565C0; }
+.type-badge.multi { background: #FCE4EC; color: #C62828; }
+
+/* === Sidebar responsive === */
+@media (max-width: 768px) {
+  .layout { flex-direction: column; }
+  .sidebar {
+    position: static;
+    width: 100% !important;
+    max-height: none;
+    order: -1;
+  }
+  .sidebar-grid { grid-template-columns: repeat(8, 1fr); }
+  .sidebar.collapsed .sidebar-grid { display: grid; }
+}
+
+/* === Wrong Book === */
+.wrong-list {
+  list-style: none;
+}
+
+.wrong-item {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wrong-item:hover {
+  background: #FFF5F5;
+  transform: translateX(4px);
+}
+
+.wrong-item .w-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.wrong-item .w-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.wrong-item .w-title {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wrong-item .w-meta {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+.wrong-item .w-count {
+  background: var(--error);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* === Empty State === */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-light);
+}
+
+.empty-state .icon { font-size: 4rem; margin-bottom: 16px; }
+
+.empty-state p { font-size: 1rem; }
+
+/* === Score Badge === */
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.score-badge.excellent { background: #E8F5E9; color: #2E7D32; }
+.score-badge.good { background: #FFF3E0; color: #E65100; }
+.score-badge.poor { background: #FFEBEE; color: #C62828; }
+
+/* === Review Mode === */
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+}
+
+.btn-danger {
+  background: var(--error);
+  color: #fff;
+}
+
+.btn-danger:hover { opacity: 0.85; }
+
+/* === Timer === */
+.timer {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* === Responsive === */
+@media (max-width: 600px) {
+  .container { padding: 12px 10px 30px; }
+  .unit-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .unit-card { padding: 16px 12px; }
+  .unit-card .unit-num { font-size: 1.5rem; }
+  .question-card { padding: 16px; }
+  .question-text { font-size: 1rem; }
+  .mode-btn { padding: 10px 14px; font-size: 0.9rem; }
+  .result-detail { grid-template-columns: 1fr; }
+  .app-header h1 { font-size: 1.3rem; }
+}
+
+@media print {
+  .app-header, .nav-bar, .bottom-bar, .mode-select { display: none; }
+  .question-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ====== HOME PAGE ====== -->
+<div id="pg-home">
+<header class="app-header">
+  <h1>习思想题库</h1>
+  <div class="subtitle">习近平新时代中国特色社会主义思想 · 学习自测系统</div>
+</header>
+<div class="container">
+  <div style="text-align:center;padding:12px 0 4px;color:#666;font-size:0.9rem">
+    共 <strong>11</strong> 个单元 · <strong id="total-count">--</strong> 道选择题 · 单选+多选 · 练习+测验
+  </div>
+  <div class="unit-grid" id="unit-grid"></div>
+  <div style="text-align:center;margin-top:16px">
+    <div class="unit-card special" style="display:inline-block;min-width:200px;cursor:pointer" onclick="goWrong()">
+      <div class="unit-num">📋</div>
+      <div class="unit-title">全部错题本</div>
+      <div class="unit-count" id="wrong-count">查看所有单元的错题</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ====== UNIT PAGE ====== -->
+<div id="pg-unit" style="display:none">
+<header class="app-header">
+  <h1 id="unit-title">单元练习</h1>
+  <div class="subtitle" id="u-mode-label">练习模式 — 选择后提交查看对错</div>
+</header>
+<nav class="nav-bar">
+  <button class="nav-back" onclick="goHome()">← 返回首页</button>
+  <span style="flex:1"></span>
+  <span class="timer" id="u-timer" style="display:none">⏱ 00:00</span>
+</nav>
+<div class="layout">
+  <aside class="sidebar" id="u-sidebar">
+    <div class="sidebar-toggle" onclick="unitPage.toggleSidebar()">
+      <span>📋 题目导航</span>
+      <span id="u-sidebar-arrow">◀</span>
+    </div>
+    <div class="sidebar-grid" id="u-sidebar-grid"></div>
+    <div class="sidebar-legend">
+      <span><span class="legend-dot cur"></span>当前</span>
+      <span><span class="legend-dot ans"></span>已答</span>
+      <span><span class="legend-dot skip"></span>标记</span>
+      <span><span class="legend-dot unans"></span>未答</span>
+    </div>
+  </aside>
+  <div class="main-area">
+    <div class="mode-select">
+      <button class="mode-btn active" id="u-btn-practice" onclick="unitPage.switchMode('practice')"><span class="icon">📝</span> 练习模式</button>
+      <button class="mode-btn" id="u-btn-test" onclick="unitPage.switchMode('test')"><span class="icon">📋</span> 单元测验</button>
+      <button class="mode-btn" id="u-btn-wrong" onclick="unitPage.switchMode('wrong')"><span class="icon">📌</span> 单元错题</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="u-progress-fill" style="width:0%"></div></div>
+    <div class="progress-text" id="u-progress-text"></div>
+    <div id="u-content"></div>
+    <div class="bottom-bar" id="u-bottom"></div>
+  </div>
+</div>
+</div>
+
+<!-- ====== WRONG BOOK PAGE ====== -->
+<div id="pg-wrong" style="display:none">
+<header class="app-header">
+  <h1>全部错题本</h1>
+  <div class="subtitle">跨单元错题汇总</div>
+</header>
+<nav class="nav-bar">
+  <button class="nav-back" onclick="goHome()">← 返回首页</button>
+  <span style="flex:1"></span>
+  <button class="btn btn-sm btn-danger" id="w-btn-clear" style="display:none" onclick="wrongPage.clearAll()">清空全部错题</button>
+</nav>
+<div class="container">
+  <div class="mode-select">
+    <button class="mode-btn active" id="w-btn-list" onclick="wrongPage.switchMode('list')"><span class="icon">📋</span> 错题列表</button>
+    <button class="mode-btn" id="w-btn-review" onclick="wrongPage.switchMode('review')"><span class="icon">📝</span> 逐题复习</button>
+  </div>
+  <div id="w-list-view"></div>
+  <div id="w-review-view" style="display:none">
+    <div style="display:flex;gap:20px">
+      <aside class="sidebar" id="w-sidebar" style="position:static;max-height:70vh">
+        <div class="sidebar-toggle" onclick="wrongPage.toggleSidebar()"><span>📋 导航</span><span id="w-sbar-arrow">◀</span></div>
+        <div class="sidebar-grid" id="w-sidebar-grid"></div>
+      </aside>
+      <div style="flex:1;min-width:0">
+        <div class="progress-bar"><div class="progress-fill" id="w-progress-fill" style="width:0%"></div></div>
+        <div class="progress-text" id="w-progress-text"></div>
+        <div id="w-review-content"></div>
+        <div class="bottom-bar" id="w-review-bottom"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// 习思想题库数据 - 单选+多选混合
+// Units: 11, Questions: 390
+
+const UNITS = [
+  {
+    id: 1,
+    name: '第一章',
+    questions: [
+      { id: 1, q: '( )通过了关于《中国共产党章程(修正案)》的决议，把习近平新时代中国特色社会主义思想写入党章。', type: 'single', opts: ['党的十七大', '党的十八大', '党的十九大', '党的二十大'], ans: 2 },
+      { id: 2, q: '( )是改革开放以来我们党全部理论和实践的鲜明主题。', type: 'single', opts: ['贯彻新发展理念', '坚持和发展中国特色社会主义', '改革开放', '以经济建设为中心'], ans: 1 },
+      { id: 3, q: '党的二十大提出了( )。', type: 'single', opts: ['"六个必须坚持"', '"十个明确"', '"十四个坚持"', '"十三个方面成就"'], ans: 0 },
+      { id: 4, q: '中国特色社会主义最本质的特征是( )。', type: 'single', opts: ['人民共同富裕', '人民当家作主', '中国共产党领导', '社会主义现代化'], ans: 2 },
+      { id: 5, q: '坚持和发展中国特色社会主义，总任务是( )。', type: 'single', opts: ['完善和发展中国特色社会主义制度、推进国家治理体系和治理能力现代化', '建设中国特色社会主义法治体系、建设社会主义法治国家', '实现社会主义现代化和中华民族伟大复兴，在全面建成小康社会的基础上，分两步走在本世纪中叶建成富强民主文明和谐美丽的社会主义现代化强国', '建设一支听党指挥、能打胜仗、作风优良的人民军队，把人民军队建设成为世界一流军队'], ans: 2 },
+      { id: 6, q: '全面深化改革的总目标是( )。', type: 'single', opts: ['坚定道路自信、理论自信、制度自信、文化自信', '完善和发展中国特色社会主义制度、推进国家治理体系和治理能力现代化', '建设中国特色社会主义法治体系、建设社会主义法治国家', '坚持和发展中国特色社会主义'], ans: 1 },
+      { id: 7, q: '世界未有之大变局正在加速演变。( )仍然是时代主题，但是不稳定不确定性更加突出。', type: 'single', opts: ['发展与共享', '和平与融合', '和平与发展', '开放与包容'], ans: 2 },
+      { id: 8, q: '中国特色社会主义的战略布局是( )。', type: 'single', opts: ['"十个明确"', '"十四个坚持"', '"四个全面"', '"五位一体"'], ans: 2 },
+      { id: 9, q: '中国特色社会主义的总体布局是( )。', type: 'single', opts: ['"三位一体"', '"四位一体"', '"五位一体"', '"六位一体"'], ans: 2 },
+      { id: 10, q: '习近平新时代中国特色社会主义思想内容十分丰富，涵盖改革发展稳定、内政外交国防、治党治国治军等各个领域、各个方面，构成了一个系统完整、逻辑严密、相互贯通的思想理论体系。下面是指导思想层面的表述的是( )。', type: 'single', opts: ['"十个明确"', '"四个全面"', '"十四个坚持"', '"四个伟大"'], ans: 0 },
+      { id: 11, q: '习近平新时代中国特色社会主义思想创立的时代背景是( )。', type: 'multi', opts: ['世界百年未有之大变局加速演进', '新时代中国正处于中华民族伟大复兴的关键时期', '我国经济高速度发展', '中国成为世界领导角色'], ans: [0,1] },
+      { id: 12, q: '新时代中国正处于中华民族伟大复兴的关键时期，因为( )。', type: 'multi', opts: ['我国发展站在了新的历史起点上', '改革面临着许多前所未有的困难和挑战，处于攻坚克难的关键时期', '新时代的中国发生新的历史性变革', '中国式现代化全面推进拓展'], ans: [0,1,2,3] },
+      { id: 13, q: '习近平总书记为习近平新时代中国特色社会主义思想的创立发挥了决定性作用，( )。', type: 'multi', opts: ['坚定的政治信仰和朴素的人民情怀，为这一思想注入了强大精神基因', '丰富的文化积淀和良好的哲学素养，为这一思想奠定了深厚的理论底蕴', '艰苦磨练和扎实的从政历练，为这一思想积累了充分的实践养分', '非凡的政治胆略和高超的政治智慧，为这一思想开辟了宽阔视野'], ans: [0,1,2,3] },
+      { id: 14, q: '习近平新时代中国特色社会主义思想回答了( )重大时代课题。', type: 'multi', opts: ['新时代坚持和发展什么样的中国特色社会主义、怎样坚持和发展中国特色社会主义', '建设什么样的社会主义现代化强国、怎样建设社会主义现代化强国', '建设什么样的长期执政的马克思主义政党、怎样建设长期执政的马克思主义政党', '建设什么美好的世界。怎样建设美好世界'], ans: [0,1,2] },
+      { id: 15, q: '习近平新时代中国特色社会主义思想的主要内容包括( )。', type: 'multi', opts: ['"六个必须坚持"', '"十个明确"', '"十四个坚持"', '"十三个方面成就"'], ans: [0,1,2,3] },
+      { id: 16, q: '习近平新时代中国特色社会主义思想是当代中国马克思主义、二十一世纪马克思主义，是( )的时代精华，实现了马克思主义中国化新的飞跃。', type: 'multi', opts: ['中华文化', '中华品格', '中国精神', '中国力量'], ans: [0,2] },
+      { id: 17, q: '坚持把马克思主义基本原理同( )相结合，用马克思主义观察时代、把握时代、引领时代，继续发展当代中国马克思主义、21世纪马克思主义。', type: 'multi', opts: ['中国具体实际相结合', '中华优秀传统文化', '中国精神', '民族特色'], ans: [0,1] },
+      { id: 18, q: '中国特色社会主义事业总体布局是"五位一体"、战略布局是"四个全面"，强调坚定( )。', type: 'multi', opts: ['道路自信', '理论自信', '制度自信', '文化自信'], ans: [0,1,2,3] },
+      { id: 19, q: '发展是解决我国一切问题的基础和关键，发展必须是科学发展，必须坚定不移贯彻创新( )的发展理念。', type: 'multi', opts: ['协调', '绿色', '开放', '共享'], ans: [0,1,2,3] },
+      { id: 20, q: '建设一支( )的人民军队，是实现"两个一百年"奋斗目标、实现中华民族伟大复兴的战略支撑。', type: 'multi', opts: ['听党指挥', '能打胜仗', '作风优良', '全心全意为人民服务'], ans: [0,1,2] },
+      { id: 21, q: '"两个确立"形成的依据是( )。', type: 'multi', opts: ['"两个确立"是中国共产党基于唯物史观两个基本原理所作出的必然选择', '"两个确立"是党的历史经验的总结运用', '"两个确立"是新时代十年实践形成的智慧结晶', '"两个确立"是战胜外部环境变化出现许多新的风险挑战、解决国内许多深层次矛盾和问题的需要'], ans: [0,1,2,3] },
+      { id: 22, q: '新时代新征程，中国共产党的中心任务，就是团结带领全国各族人民全面建成社会主义现代化强国、实现第一个百年奋斗目标。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 1 },
+      { id: 23, q: '世界面临百年未有之大变局给中华民族伟大复兴带来重大机遇。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 24, q: '习近平新时代中国特色社会主义思想是马克思主义中国化的第一次历史性飞跃。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 1 },
+      { id: 25, q: '习近平新时代中国特色社会主义思想是在把握世界发展大势、应对全球共同挑战、维护人类共同利益的过程中创立并不断丰富发展的。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 26, q: '三个重大时代课题，是站在新时代历史节点上向中国共产党人提出的"时代三问"。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 27, q: '我们党的历史，就是一部不断推进马克思主义中国化的历史，就是一部不断推进理论创新、进行理论创造的历史。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 28, q: '习近平新时代中国特色社会主义思想系统全面、逻辑严密、博大精深。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 29, q: '"三个代表"重要思想是当代中国马克思主义、二十一世纪马克思主义，是中华文化和中国精神的时代精华，实现了马克思主义中国化时代化新的飞跃。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 1 },
+      { id: 30, q: '习近平在强调坚持"第一个结合"的基础上，明确提出把( )相结合的重大命题。', type: 'single', opts: ['马克思主义基本原理同中华优秀传统文化', '中国具体实际', '中国精神', '民族特色'], ans: 0 },
+      { id: 31, q: '习近平新时代中国特色社会主义思想回答了新时代( )、建设什么样的社会主义现代化强国怎样建设社会主义现代化强国、建设什么样的长期执政的马克思主义政党怎样建设长期执政的马克思主义政党的重大时代课题。', type: 'single', opts: ['坚持和发展什么样的中国特色社会主义、怎样坚持和发展中国特色社会主义', '建设什么样的社会主义现代化强国、怎样建设社会主义现代化强国', '建设什么样的长期执政的马克思主义政党、怎样建设长期执政的马克思主义政党', '建设什么样的美好世界、怎样建设美好世界'], ans: 0 },
+      { id: 32, q: '中国特色社会主义制度的最大优势是( )。', type: 'single', opts: ['中国共产党领导', '人民当家作主', '全面依法治国', '人民代表大会制度'], ans: 0 },
+      { id: 33, q: '( )是最高政治领导力量。', type: 'single', opts: ['中国共产党领导', '全国人民代表大会', '国务院', '中央军委'], ans: 0 },
+      { id: 34, q: '全面深化改革总目标是( )、推进国家治理体系和治理能力现代化。', type: 'single', opts: ['完善和发展中国特色社会主义制度', '建设中国特色社会主义法治体系', '实现社会主义现代化', '坚持和发展中国特色社会主义'], ans: 0 },
+      { id: 35, q: '全面推进依法治国的总目标，是( )，建设社会主义法治国家。', type: 'single', opts: ['建设中国特色社会主义法治体系', '完善和发展中国特色社会主义制度', '推进国家治理体系现代化', '全面深化改革'], ans: 0 },
+      { id: 36, q: '必须坚持和完善社会主义基本经济制度，使市场在资源配置中起( )作用，更好发挥政府作用。', type: 'single', opts: ['决定性', '基础性', '主导性', '辅助性'], ans: 0 },
+      { id: 37, q: '"两个确立"是确立习近平同志党中央的核心、全党的核心地位，确立( )。', type: 'single', opts: ['习近平新时代中国特色社会主义思想的指导地位', '马克思主义的指导地位', '中国特色社会主义理论体系', '中国共产党党章'], ans: 0 },
+      { id: 38, q: '( )是马克思主义中国化的最新成果，是中国特色社会主义理论体系的重要组成部分。', type: 'single', opts: ['习近平新时代中国特色社会主义思想', '邓小平理论', '"三个代表"重要思想', '科学发展观'], ans: 0 },
+      { id: 39, q: '简述习近平新时代中国特色社会主义思想创立的时代背景。', type: 'single', opts: ['（简答题，请参考教材）', '以上都不正确', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 40, q: '简述习近平新时代中国特色社会主义思想的历史地位。', type: 'single', opts: ['（简答题，请参考教材）', '以上都不正确', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 41, q: '简述"两个确立"的决定性意义。', type: 'single', opts: ['（简答题，请参考教材）', '以上都不正确', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 42, q: '( )是马克思主义中国化的最新成果，是中国特色社会主义理论体系的重要组成部分。', type: 'single', opts: ['习近平新时代中国特色社会主义思想', '邓小平理论', '"三个代表"重要思想', '科学发展观'], ans: 0 },
+      { id: 43, q: '"三个代表"重要思想是当代中国马克思主义、二十一世纪马克思主义，是中华文化和中国精神的时代精华，实现了马克思主义中国化时代化新的飞跃。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 1 },
+      { id: 44, q: '简述"两个确立"的决定性意义。', type: 'single', opts: ['（简答题，请参考教材）', '以上都不正确', '以上都不正确', '以上都不正确'], ans: 0 }
+    ]
+  },
+  {
+    id: 2,
+    name: '第二章',
+    questions: [
+      { id: 1, q: '一百年来，中国共产党团结带领中国人民进行的一切奋斗、一切牺牲、一切创造，归结起来就是一个主题( )。', type: 'single', opts: ['建立新中国', '追求共同富裕', '实现中华民族伟大复兴', '实现人民对美好生活的向往'], ans: 2 },
+      { id: 2, q: '中国梦归根到底是( )，必须紧紧依靠人民来实现，必须不断为人民造福。', type: 'single', opts: ['国家的梦', '人民的梦', '民族的梦', '世界的梦'], ans: 1 },
+      { id: 3, q: '中华民族伟大复兴的中国梦是( )相统一的梦。', type: 'single', opts: ['国家情怀、民族情怀、人民情怀', '国家情怀、民族情怀、社会情怀', '民族情怀、世界情怀、人民情怀', '国家情怀、家庭情怀、人民情怀'], ans: 0 },
+      { id: 4, q: '实现中国梦必须走中国道路，这就是( )。', type: 'single', opts: ['中华民族大团结之路', '社会发展之路', '人民民主专政之路', '中国特色社会主义道路'], ans: 3 },
+      { id: 5, q: '实现中国梦必须凝聚中国力量，这就是( )。', type: 'single', opts: ['各族人民大团结的力量', '中国共产党的领导力量', '中高速增长的经济力量。', '保障有力的军事力量'], ans: 0 },
+      { id: 6, q: '( )首次把"小康"作为经济建设总的奋斗目标。', type: 'single', opts: ['党的十七大', '党的十五大', '党的十二大', '党的十一届三中全会'], ans: 2 },
+      { id: 7, q: '( )针对当时小康低水平、不全面、发展很不平衡的实际，提出全面建设小康社会目标', type: 'single', opts: ['党的十四大', '党的十六大', '党的十五大', '党的十七大'], ans: 1 },
+      { id: 8, q: '从全面建设社会主义现代化国家进程的阶段安排看来，到2035年，我国将( )。', type: 'single', opts: ['全面建成小康社会', '实现中华民族伟大复兴的中国梦', '把我国建设成为富强美丽文明和谐的社会现代化强国。', '基本实现社会主义现代化'], ans: 3 },
+      { id: 9, q: '党的十九大提出，到( )各方面制度更加完善，国家治理体系和治理能力现代化基本实现。', type: 'single', opts: ['2035年', '2030年', '2025年', '2020年'], ans: 0 },
+      { id: 10, q: '2021年7月1日，习近平在天安门城楼上庄严宣告，经过全党全国各族人民持续奋斗，我们实现了( )。', type: 'single', opts: ['第一个百年奋斗目标', '社会主义现代化国家', '社会主义现代化强国', '中华民族伟大复兴'], ans: 0 },
+      { id: 11, q: '全面建成社会主义现代化强国的战略安排，把基本实现社会主义现代化的时间提前了( )年。', type: 'single', opts: ['25年', '15年', '35年', '10年'], ans: 1 },
+      { id: 12, q: '党的二十大指出，新时代新征程中国共产党的中心任务，就是( )。', type: 'multi', opts: ['团结带领全国各族人民全面建成社会主义现代化强国', '实现第二个百年奋斗目标', '以中国式现代化全面推进中华民族伟大复兴。', '贯彻新发展理念，促进高质量发展'], ans: [0,1,2] },
+      { id: 13, q: '坚持和发展中国特色社会主义的总任务是( )。', type: 'multi', opts: ['解放和发展社会生产力', '现社会主义现代化和中华民族伟大复兴', '实在全面建成小康社会的基础上，分两步走在本世纪中叶建成富强民主文明和谐美丽的社会主义现代化强国', '中国梦是中华民族伟大复兴的形象表达'], ans: [1,2,3] },
+      { id: 14, q: '中国梦的科学内涵是( )', type: 'multi', opts: ['国家富强', '社会和谐', '民族振兴', '人民幸福'], ans: [0,2,3] },
+      { id: 15, q: '中国梦的实现途径是( )。', type: 'multi', opts: ['坚持中国道路', '维护世界和平', '弘扬中国精神', '凝聚中国力量'], ans: [0,2,3] },
+      { id: 16, q: '关于中国梦的内涵理解正确的是( )。', type: 'multi', opts: ['核心内容时国家富强、民族振兴、人民幸福', '中国梦是国家的梦、民族的梦、归根到底是人民的梦', '国家富强、民族振兴是人民幸福的基础和保障', '人民幸福是国家富强、民族振兴的根本出发点和落脚点'], ans: [0,1,2,3] },
+      { id: 17, q: '我们确立了"两个一百年"奋斗目标，就是( )。', type: 'multi', opts: ['到2020年实现国内生产总值和城乡居民人均收入比2010年翻一番，全面建成小康社会', '到本世纪中叶建成富强民主文明和谐美丽的社会主义现代化国家，实现中华民族伟大复兴', '到2035年，基本建成社会主义现代化国家', '到2025年，实现工业强国目标'], ans: [0,1] },
+      { id: 18, q: '党的十九大报告中提出全面建设社会主义现代化国家的进程分两个阶段来安排( )。', type: 'multi', opts: ['第一阶段，从2017年到2037年在全面建成小康社会的基础上，再奋斗15年，基本实现社会主义现代化', '第二个阶段，从2037年到本世纪中叶在基本实现现代化的基础上，再奋斗15年，把我国建成富强民主文明和谐美丽的社会主义现代化强国', '第一个阶段，从2020年到2035年，在全面建成小康社会的基础上，再奋斗15年，基本实现社会主义现代化', '第二个阶段，从2035年到本世纪中叶，在基本实现现代化的基础上，再奋斗15年，把我国建成富强民主文明和谐美丽的社会主义现代化强国'], ans: [2,3] },
+      { id: 19, q: '中国梦是( )的梦，与世界各国人民的美好梦想相通。', type: 'multi', opts: ['和平', '发展', '合作', '共赢'], ans: [0,1,2,3] },
+      { id: 20, q: '( )，是我们党的初心和使命，是党领导现代化建设的出发点和落脚点，也是新发展理念的"根"和"魂。', type: 'multi', opts: ['为人民谋幸福', '为人民谋复兴', '为民族谋复兴', '为民族谋幸福'], ans: [0,2] },
+      { id: 21, q: '从2020年到2035年，基本实现社会主义现代化的目标要求( )。', type: 'multi', opts: ['在经济建设方面，我国经济实力、科技实力将大幅跃升，跻身创新型国家前列', '在政治建设方面，人民平等参与、平等发展权利得到充分保障，法治国家、法治政府、法治社会基本建成，各方面制度更加完善，国家治理体系和治理能力现代化基本实现', '在文化建设方面，社会文明程度达到新的高度，国家文化软实力显著增强，中华文化影响更加广泛深入', '在生态文明建设方面，生态环境根本好转，美丽中国目标基本实现'], ans: [0,1,2,3] },
+      { id: 22, q: '从2035年到本世纪中叶，建成社会主义现代化强国的目标要求( )', type: 'multi', opts: ['我国将拥有高度的物质文明，社会生产力水平大幅提高，核心竞争力名列世界前茅，经济总量和市场规模超越其他国家', '我国将拥有高度的政治文明，形成又有集中又有民主、又有纪律又有自由、又有统一意志又有个人心情舒畅生动活泼的政治局面，依法治国和以德治国有机结合', '我国将拥有高度的精神文明，践行社会主义核心价值观成为全社会自觉行动，国民素质显著提高，中国精神、中国价值、中国力量成为中国发展的重要影响力和推动力', '我国将拥有高度的社会文明，城乡居民将普遍拥有较高的收入、富裕的生活、健全的基本公共服务'], ans: [0,1,2,3] },
+      { id: 23, q: '全面建成了小康社会的重大意义是( )。', type: 'multi', opts: ['意味着中华民族实现千百年来的夙愿', '表明我国发展和人民生活水平跃上新的大台阶', '表明我国已经实现了由高速发展向高质量发展转变', '是实现中华民族伟大复兴征程中的关键一步'], ans: [0,1,3] },
+      { id: 24, q: '中国式现代化的特征是( )。', type: 'multi', opts: ['人口规模巨大的现代化', '全体人民共同发展的现代化', '物质文明和精神文明相协调的现代化', '.人与自然和谐共生的现代化', '走和平发展道路的现代化'], ans: [0,2,3,4] },
+      { id: 25, q: '中国式现代化( )。', type: 'multi', opts: ['深深植根于中华优秀传统文化', '体现科学社会主义的先进本质', '借鉴吸收一切人类优秀文明成果', '代表人类文明进步的发展方向', '是一种全新的人类文明形态，但不可复制。'], ans: [0,1,2,3] },
+      { id: 26, q: '中国式现代化的本质要求是( )。', type: 'multi', opts: ['坚持中国共产党领导', '坚持中国特色社会主义', '实现高质量发展', '发展全过程人民民主，', '实现全体人民共同富裕'], ans: [0,1,2,3,4] },
+      { id: 27, q: '推进中国式现代化需要牢牢把握的重大原则是( )。', type: 'multi', opts: ['坚持和加强党的全面领导', '坚持中国特色社会主义道路', '坚持以人民为中心的发展思想', '坚持深化改革开放', '坚持发扬斗争精神'], ans: [0,1,2,3,4] },
+      { id: 28, q: '推进中国式现代化需要正确处理的重大关系是( )。', type: 'multi', opts: ['正确处理顶层设计与实践探索的关系', '正确处理战略与策略的关系', '正确处理守正与创新的关系', '正确处理效率与公平的关系', '正确处理独立自主与对外开放的关系'], ans: [0,1,2,3,4] },
+      { id: 29, q: '共同富裕是中国特色社会主义的本质要求，我国很快就实现共同富裕。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 1 },
+      { id: 30, q: '团结奋斗是中国共产党和中国人民最显著的精神标识，是中国人民创造历史伟业的必由之路。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 31, q: '中国式现代化创造了人类文明新形态，为人类实现现代化提供了新的选择。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 32, q: '独立自主是我们立党立国的重要原则，对外开放是我国的基本国策。推进中国式现代化，必须坚持独立自主、自立自强。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 33, q: '中国式现代化为广大发展中国家探索现代化道路提供了全新选择。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 34, q: '( )源远流长、博大精深，是中华民族独特的精神标识，是当代中国文化的根基，是维系全世界华人的精神纽带。', type: 'single', opts: ['中华文明', '中华文化', '中华品格', '中国精神'], ans: 0 },
+      { id: 35, q: '( )是中华民族近代以来最伟大的梦想。', type: 'single', opts: ['实现中华民族伟大复兴', '全面建成小康社会', '实现现代化', '建成社会主义强国'], ans: 0 },
+      { id: 36, q: '实现中华民族伟大复兴的中国梦，就是要实现( )、( )、人民幸福。', type: 'multi', opts: ['国家富强', '民族振兴', '人民幸福', '社会和谐'], ans: [0,1] },
+      { id: 37, q: '从现在起，中国共产党的中心任务，就是团结带领全国各族人民全面建成社会主义现代化强国、实现( )目标，以中国式现代化全面推进中华民族伟大复兴。', type: 'single', opts: ['第二个百年奋斗', '第一个百年奋斗', '社会主义现代化', '中华民族伟大复兴'], ans: 0 },
+      { id: 38, q: '( )是全面建设社会主义现代化国家的主心骨和领航者。', type: 'single', opts: ['中国共产党', '全国人民代表大会', '国务院', '中央军委'], ans: 0 },
+      { id: 39, q: '( )直接关系中国式现代化的根本方向、前途命运、最终成败。', type: 'single', opts: ['党的领导', '改革开放', '社会主义道路', '人民民主'], ans: 0 }
+    ]
+  },
+  {
+    id: 3,
+    name: '第三章',
+    questions: [
+      { id: 1, q: '习近平指出："一定要认清，中国最大的国情就是（ ）。什么是中国特色？这就是中国特色。"', type: 'single', opts: ['人口14亿', '中国共产党的领导', '人均GDP世界第二', '吃饭是个大的问题'], ans: 1 },
+      { id: 2, q: '（ ）是党的领导的最高原则，是党保持团结统一和强大战斗力的关键所在。', type: 'single', opts: ['民主集中制', '党中央集中统一领导', '群众路线', '实事求是'], ans: 1 },
+      { id: 3, q: '维护党中央权威和集中统一领导，最关键的是（ ）。', type: 'single', opts: ['坚决维护习近平同志党中央的核心、全党的核心地位', '实行民主集中制', '修改党章，加强党中央权力', '严明政治纪律'], ans: 0 },
+      { id: 4, q: '中国共产党是以（ ）为根本组织原则和领导制度。', type: 'single', opts: ['群众路线', '民主集中制', '党章', '政治纪律'], ans: 1 },
+      { id: 5, q: '党的领导制度是我国的（ ）制度', type: 'single', opts: ['根本制度', '重要制度', '基本制度', '政策策略'], ans: 0 },
+      { id: 6, q: '坚持党总揽全局、协调各方的领导核心地位，（ ）形象地说，这就像"众星捧月"，这个"月"就是中国共产党。', type: 'single', opts: ['习近平', '邓小平', '毛泽东', '江泽民'], ans: 0 },
+      { id: 7, q: '中国共产党的性质决定了党的宗旨是（ ）。', type: 'single', opts: ['立党为公、执政为民', '以人为本、执政为民', '全心全意为人民服务', '为实现共产主义而奋斗'], ans: 2 },
+      { id: 8, q: '（ ）是我国的根本领导制度，居于统领地位。', type: 'single', opts: ['党的组织原则', '党的政治原则', '党的领导制度', '党的性质宗旨'], ans: 2 },
+      { id: 9, q: '历史和现实证明，（ ）就没有中国特色社会主义的产生与发展。', type: 'single', opts: ['没有中国共产党的指导', '没有中国共产党的组织', '没有中国共产党的领导', '没有中国共产党的监督'], ans: 2 },
+      { id: 10, q: '（ ）将党的领导制度明确为我国根本领导制度。', type: 'single', opts: ['党的十九大', '党的十九届三中全会', '党的十九届四中全会', '党的十九届五中全会'], ans: 2 },
+      { id: 11, q: '《中国共产党党章》明确规定，中国共产党是中国工人阶级的先锋队，同时是（ ）。', type: 'single', opts: ['中国人民的先锋队', '中华民族的先锋队', '中国人民和中华民族的先锋队', '以上都不正确'], ans: 2 },
+      { id: 12, q: '（ ）是中国特色社会主义最本质的特征。', type: 'single', opts: ['以经济建设为中心', '以人为本', '"五位一体总体布局"', '中国共产党的领导'], ans: 3 },
+      { id: 13, q: '面对新时代新挑战新要求，（ ）就是战胜艰难险阻，不断取得胜利的制胜法宝。', type: 'single', opts: ['改进完善党的领导', '坚持和加强党的领导', '全面推进党的改革', '增加党员人数'], ans: 1 },
+      { id: 14, q: '中国共产党的领导是中国特色社会主义最本质的特征，这是（ ）以来习近平提出的一个重要论断。', type: 'single', opts: ['党的十八大', '党的十五大', '党的十九大', '党的十七大'], ans: 0 },
+      { id: 15, q: '中国共产党领导是中国特色社会主义最本质的特征，（ ）。', type: 'multi', opts: ['这是在近代以来中国历史发展中形成的', '这是由中国最广大人民根本利益决定的', '这是实现中华民族伟大复兴历史任务决定的', '这决定了中国特色社会主义其他特点和特征'], ans: [0,1,3] },
+      { id: 16, q: '中国特色社会主义之所以是社会主义，究其根本就在于（ ）。', type: 'multi', opts: ['坚持科学社会主义基本原则', '坚持中国共产党的领导', '坚持按劳分配', '坚持社会主义市场经济体制'], ans: [0,1] },
+      { id: 17, q: '全面加强党的领导，（ ）。', type: 'multi', opts: ['使我们有效应对严峻复杂的国际形势和接踵而至的巨大风险挑战', '有力推进了党和国家各项事业的顺利发展', '胜利实现了全面建成小康社会的战略目标', '开启了全面建设社会主义现代化国家新征程', '在反腐败、脱贫攻坚等重大斗争中，党的全面领导的优势得到充分彰显'], ans: [0,1,2,3,4] },
+      { id: 18, q: '健全党的全面领导制度，必须（ ）。', type: 'multi', opts: ['必须完善党在各种组织中发挥领导作用的制度', '必须完善党协调各方的机制', '必须完善党领导各项事业的具体制度', '必须完善人民代表大会制度'], ans: [0,1,2] },
+      { id: 19, q: '党的领导是做好党和国家各项工作的根本保证，是我国（ ）的根本点，绝对不能有丝毫动摇。', type: 'multi', opts: ['民族团结', '社会稳定', '政治稳定', '经济发展'], ans: [0,1,2,3] },
+      { id: 20, q: '确保党始终总揽全局、协调各方，必须增强政治意识（ ），自觉维护党中央权威和集中统一领导，自觉在思想上政治上行动上同党中央保持高度一致。', type: 'multi', opts: ['大局意识', '核心意识', '中心意识', '看齐意识'], ans: [0,1,3] },
+      { id: 21, q: '党是最高政治领导力量，这是由我国（ ）和（ ）所决定的。', type: 'multi', opts: ['国家性质', '国体政体', '经济基础', '经济制度'], ans: [0,1] },
+      { id: 22, q: '坚持和完善党的领导，是（ ）。', type: 'multi', opts: ['党和国家的根本所在、命脉所在', '全国各族人民的利益所在、幸福所在', '中国特色社会主义最本质的特征', '中国特色社会主义制度的最大优势'], ans: [0,1,2,3] },
+      { id: 23, q: '中国共产党是中国特色社会主义事业的（ ）。', type: 'multi', opts: ['开创者', '推动者', '引领者', '发动者'], ans: [0,1,2] },
+      { id: 24, q: '党章规定的民主集中制要求（ ）。', type: 'multi', opts: ['党员个人服从党的组织', '少数服从多数', '下级组织服从上级组织', '全党各个组织和全体党员服从党的全国代表大会和中央委员会'], ans: [0,1,2,3] },
+      { id: 25, q: '坚持和加强党的全面领导，使党的（ ）显著增强。', type: 'multi', opts: ['政治领导力', '思想引领力', '群众组织力', '社会号召力'], ans: [0,1,2,3] }
+    ]
+  },
+  {
+    id: 4,
+    name: '第四章',
+    questions: [
+      { id: 1, q: '（ ）是立党为公、执政为民的本质要求。', type: 'single', opts: ['贯彻新发展理念', '实现高质量发展', '为民造福', '政治立场'], ans: 2 },
+      { id: 2, q: '（ ）始终是党的生命线和根本工作路线，是我们党永葆青春活力和战斗力的重要传家宝。', type: 'single', opts: ['群众路线', '经济路线', '人民立场', '政治立场'], ans: 0 },
+      { id: 3, q: '（ ）是新时代坚持和发展中国特色社会主义的根本立场，是贯穿党治国理政全部活动的一条红线。', type: 'single', opts: ['把马克思主义基本原理与中国实际相结合', '坚持以人民为中心', '坚持和发展中国特色社会主义', '"五位一体"总体布局'], ans: 1 },
+      { id: 4, q: '中国共产党区别于其他政党的显著标志是（ ）。', type: 'single', opts: ['深化改革', '人民立场', '促进高质量发展', '实事求是'], ans: 1 },
+      { id: 5, q: '（ ）是党执政的最大底气，也是党执政最深厚的根基。', type: 'single', opts: ['实现共产主义理想', '物质基础雄厚', '有丰富经验', '人民'], ans: 3 },
+      { id: 6, q: '（ ）是党的工作的最高裁决者和最终评判者。', type: 'single', opts: ['实践', '人民', '国务院', '党中央'], ans: 1 },
+      { id: 7, q: '（ ）是贯彻群众路线的有效途径。', type: 'single', opts: ['以人民为中心', '调查研究', '把人民对美好生活作为奋斗目标', '构建新发展格局'], ans: 1 },
+      { id: 8, q: '我们党讲宗旨，讲了很多话，但说到底还是（ ）这句话。', type: 'single', opts: ['以人民为中心', '为人民服务', '坚持人民主体地位', '群众路线是根本工作路线'], ans: 1 },
+      { id: 9, q: '新时代要坚持以人民为中心，在推动社会全面进步中促进（ ）的全面发展。', type: 'single', opts: ['人', '经济', '政治', '文化'], ans: 0 },
+      { id: 10, q: '（ ）是社会主义的本质要求，是中国式现代化的重要特征。', type: 'single', opts: ['共同富裕', '社会和谐', '人民主体地位', '解决社会主要矛盾'], ans: 0 },
+      { id: 11, q: '实现全体人民共同富裕的宏伟目标，最终靠的是（ ）。', type: 'single', opts: ['人', '奋斗', '实干', '发展'], ans: 3 },
+      { id: 12, q: '党执政后的最大危险是（ ）。', type: 'single', opts: ['消极腐败', '改革出问题', '没有坚持公有制的主体地位', '脱离群众'], ans: 3 },
+      { id: 13, q: '我们党的最大政治优势是（ ）。', type: 'single', opts: ['党领导一切', '走中国特色社会主义道路', '人多力量大', '密切联系群众'], ans: 3 },
+      { id: 14, q: '对"江山就是人民、人民就是江山"的理解是（ ）。', type: 'multi', opts: ['闪耀着历史唯物主义的真理光芒', '充分说明我国国体政体的人民性', '人民是我们党的生命之根、执政之基、力量之源', '这是由我们党的性质、宗旨决定的'], ans: [0,1,2,3] },
+      { id: 15, q: '坚持人民立场，就要做到（ ）。', type: 'multi', opts: ['与人民风雨同舟、生死与共', '始终牢记党的初心和使命', '始终保持党同人民群众的血肉联系', '坚持以人民为中心的执政理念'], ans: [0,1,2,3] },
+      { id: 16, q: '党依靠人民创造历史伟业，就要做到（ ）。', type: 'multi', opts: ['尊重人民主体地位', '尊重人民首创精神', '激发人民群众的创新创造活力', '总结、概括人民群众实践中形成的新鲜经验'], ans: [0,1,2,3] },
+      { id: 17, q: '领导干部要树立这样的政绩观（ ）。', type: 'multi', opts: ['以人民满意不满意作为检验工作的最终评判标准', '把为民办事、为民造福作为最重要的政绩', '把为老百姓办了多少好事实事作为检验政绩的重要标准', '以国内生产总值增长率论英雄', '大搞劳民伤财的形象工程和政绩工程'], ans: [0,1,2,3] },
+      { id: 18, q: '坚持以人民为中心的发展思想，要（ ）。', type: 'multi', opts: ['坚持和贯彻党的群众路线', '把以人民为中心的发展思想切实贯穿到党和国家事业各方面', '推动全体人民共同富裕取得更为明显的实质性进展', '总结、概括人民群众实践中形成的新鲜经验'], ans: [0,1,2,3] },
+      { id: 19, q: '对党的群众路线的理解，（ ）。', type: 'multi', opts: ['其内容是一切为了群众，一切依靠群众，从群众中来，到群众中去', '它是唯物史观关于人民群众是历史创造者的原理在党的工作中的运用', '它充分体现了以人民为中心的根本政治立场', '它是我们党永葆青春活力和战斗力的重要传家宝'], ans: [0,1,2,3] },
+      { id: 20, q: '实现共同富裕 ，（ ）。', type: 'multi', opts: ['这是中国特色社会主义的本质要求', '这是中国式现代化的重要特征', '这不仅是经济问题，而且是关系党的执政基础的重大政治问题', '要处理好先富和共富的关系', '这是解决我国发展不平衡不充分问题的现实需要'], ans: [0,1,2,3,4] },
+      { id: 21, q: '扎实推进共同富裕，要把握好（ ）的原则。', type: 'multi', opts: ['鼓励勤劳创新致富', '坚持基本经济制度', '量力而行', '坚持循序渐进', '整齐划一'], ans: [0,1,2,3] },
+      { id: 22, q: '党依靠人民，从小到大、从弱到强，打败了强大的内外敌人，取得了新民主主义革命胜利，实现了（ ），建立了中华人民共和国。', type: 'multi', opts: ['人民幸福', '民族独立', '人民解放', '国家富强'], ans: [1,2] },
+      { id: 23, q: '党依靠人民，推进（ ）走出一条中国特色社会主义道路。', type: 'multi', opts: ['改革开放', '社会主义现代化建设', '全面建成小康社会', '社会主义现代化国家'], ans: [0,1] },
+      { id: 24, q: '党依靠人民，推动党和国家事业（ ），推动中国特色社会主义进入新时代。', type: 'multi', opts: ['经济社会发展', '人民生活更加富裕', '发生历史性变革', '取得历史性成就'], ans: [2,3] },
+      { id: 25, q: '以人民为中心是我们党（ ）的生动体现，是全心全意为人民服务的时代彰显。', type: 'multi', opts: ['立党为公', '落实群众路线', '坚持宗旨原则', '执政为民'], ans: [0,3] },
+      { id: 26, q: '以人民为中心的发展思想，不是高高在上的宣传口号，绝对不能只停留在口头上，要全方位贯穿于经济社会发展的各个环节，体现在人民群众（ ）的扎实提升上。', type: 'multi', opts: ['使命感', '获得感', '幸福感', '安全感'], ans: [1,2,3] },
+      { id: 27, q: '（ ）与（ ）相统一，既是马克思主义的价值追求，也是社会主义的本质要求，更是中国共产党人的奋斗目标。', type: 'multi', opts: ['促进人的全面发展', '促进社会稳定', '促进共同富裕', '促进经济发展'], ans: [0,2] },
+      { id: 28, q: '坚持以人民为中心的发展思想，就要在高质量发展中促进共同富裕，做到（ ）。', type: 'multi', opts: ['发展为了人民', '发展幸福人民', '发展依靠人民', '发展成果由人民共享'], ans: [0,2,3] }
+    ]
+  },
+  {
+    id: 5,
+    name: '第五章',
+    questions: [
+      { id: 1, q: '习近平强调："（ ）是决定当代中国命运的关键一招，也是决定实现\'两个一百年\'奋斗目标、实现中华民族伟大复兴的关键一招。"', type: 'single', opts: ['高质量发展', '改革开放', '全面依法治国', '文化自信'], ans: 1 },
+      { id: 2, q: '全面深化改革的总目标是（ ）。', type: 'single', opts: ['推进国家治理体系和治理能力现代化', '完善和发展中国特色社会主义制度，推进国家治理体系和治理能力现代化', '进一步解放思想、发展社会生产力', '赋予社会主义新的生机活力，推进国家治理体系和治理能力现代化'], ans: 1 },
+      { id: 3, q: '中国坚持对外开放的基本国策，坚定奉行（ ）的开放战略。', type: 'single', opts: ['互利共赢', '不结盟', '"一带一路"倡议', '构建人类命运共同体'], ans: 0 },
+      { id: 4, q: '"一带一路"建设，坚持（ ）原则，机会和成果属于全世界。', type: 'single', opts: ['互利共赢', '共商共建共享', '共商共建', '平等互惠'], ans: 1 },
+      { id: 5, q: '（ ）是新时代全面深化改革开放的思想前提。', type: 'single', opts: ['实事求是', '解放思想', '开拓创新', '贯彻新发展理念'], ans: 1 },
+      { id: 6, q: '党的十九大提出，到（ ）"各方面制度更加完善，国家治理体系和治理能力现代化基本实现"。', type: 'single', opts: ['2035年', '2030年', '2025年', '2020年'], ans: 0 },
+      { id: 7, q: '中国特色社会主义制度和国家治理体系是以（ ）为指导、植根中国大地、具有深厚中华文化根基、深得人民拥护的制度和治理体系。', type: 'single', opts: ['社会主义', '中国特色社会主义', '马克思主义', '毛泽东思想'], ans: 2 },
+      { id: 8, q: '坚持和完善中国特色社会主义制度、推进国家治理体系和治理能力现代化，不仅要建立完善的制度体系，还要在不断提高（ ）上狠下功夫。', type: 'single', opts: ['民主与法治', '制度创新和社会和谐', '社会发展和经济增速', '制度执行力和治理能力'], ans: 3 },
+      { id: 9, q: '（ ）作出了全面深化改革的决定。', type: 'single', opts: ['党的十八大', '党的十八届三中全会', '党的十九大', '党的十九届六中全会'], ans: 1 },
+      { id: 10, q: '全面深化改革能否顺利推进，关键取决于党，取决于（ ）。', type: 'single', opts: ['全体人民的共同参与', '党的集中统一领导', '全方位对外开放', '社会主义的发展方向'], ans: 1 },
+      { id: 11, q: '（ ）是运用国家制度管理国家各方面事务的能力。', type: 'single', opts: ['治理能力', '治理体系', '管理能力', '协调能力'], ans: 0 },
+      { id: 12, q: '（ ），习近平先后提出共建"丝绸之路经济带"和"21世纪海上丝绸之路"的重大倡议。', type: 'single', opts: ['2015年9月和10月', '2014年9月和10月', '2013年9月和10月', '2012年9月和10月'], ans: 2 },
+      { id: 13, q: '中阿新闻交流中心、中阿电子图书馆门户网站正式落地；"汉语热"在阿拉伯国家持续升温，沙特、阿联酋、埃及宣布将中文教学纳入国民教育体系。上述现象主要说明（ ）', type: 'single', opts: ['各国之间经济互联互通', '形成了"一带一路"产业化集群', '"一带一路"促进人文交流更加深入', '中华文化成为人类文明的中心'], ans: 2 },
+      { id: 14, q: '推进改革的目的是要不断推进我国社会主义制度（ ），赋予社会主义新的生机活力。', type: 'single', opts: ['自我完善和发展', '现实性和实效性', '人民性和整体性', '整体推进和全面发展'], ans: 0 },
+      { id: 15, q: '改革开放是（ ）。', type: 'multi', opts: ['决定当代中国命运的关键一招', '坚持和发展中国特色社会主义的必由之路', '党和人民大踏步赶上时代的重要法宝', '完成新时代目标任务的必然要求'], ans: [0,1,2,3] },
+      { id: 16, q: '改革开放是坚持和发展中国特色社会主义的必由之路，因为（ ）。', type: 'multi', opts: ['改革开放为中国特色社会主义开创、发展和完善提供了实践基础', '改革开放深化了对社会主义建设规律的认识，为坚持和发展中国特色社会主义提供了有力支撑', '谱写新时代中国特色社会主义的新篇章，依然需要全面深化改革、不断扩大对外开放', '以上都正确'], ans: [0,1,2,3] },
+      { id: 17, q: '党的十一届三中全会来，我国创造了（ ）两大奇迹,极大地改变了中国的面貌。', type: 'multi', opts: ['经济快速发展', '社会长期发展', '民族团结', '"新四大发明"'], ans: [0,1] },
+      { id: 18, q: '当前，之所以要全面深化改革开放 ，是因为（ ）。', type: 'multi', opts: ['发展中不平衡、不协调、不可持续问题依然突出', '科技创新能力不强', '产业结构不合理，发展方式依然粗放', '城乡区域发展差距和居民收入分配差距依然较大', '形式主义、官僚主义、享乐主义和奢靡之风问题突出'], ans: [0,1,2,3,4] },
+      { id: 19, q: '全面深化改革开放，必须（ ）。', type: 'multi', opts: ['勇于破除一切不合时宜的观念，深入贯彻新理念新思想新战略', '勇于打破部门利益、行业利益、本位思想，服从国家整体利益', '勇于破除根本制度、基本制度障碍，构建系统完备、科学规范、运行有效的制度体系', '勇于破解我国开放型经济体制建设中的突出问题，积极适应经济全球化新趋势'], ans: [0,1,3] },
+      { id: 20, q: '全面深化改革开放，是一场全面、系统、整体的制度创新，要着眼于建立一整套更完备、更稳定、更管用的制度体系，包括（ ）。', type: 'multi', opts: ['坚持和完善人民当家作主制度体系', '完善涉外经济法律和规则体系', '坚持和完善繁荣发展社会主义先进文化的制度', '坚持和完善统筹城乡的民生保障制度和共建共治共享的社会治理制度', '坚持和完善生态文明制度体系'], ans: [0,1,2,3,4] },
+      { id: 21, q: '改革开放要坚守政治原则和底线，不是改弦易张。这里面最核心的是（ ）、（ ），偏离了这一条，那就南辕北辙了。', type: 'multi', opts: ['坚持和改善人民代表大会制度', '坚持和改善党的领导', '坚持和完善中国特色社会主义制度', '建成社会主义现代化'], ans: [1,2] },
+      { id: 22, q: '改革开放是有方向、有立场、有原则的，必须（ ）。', type: 'multi', opts: ['有利于进一步解放思想、进一步解放和发展社会生产力', '坚持以人民为中心，促进社会公平正义、增进人民福祉', '坚持和改善党的全面领导、坚持和完善中国特色社会主义制度', '推进我国社会主义制度自我完善和发展，赋予社会主义新的生机活力'], ans: [0,1,2,3] },
+      { id: 23, q: '推进国家治理体系和治理能力现代化，（ ）。', type: 'multi', opts: ['这是一个国家现代化的重要标志', '必须坚定中国特色社会主义制度自信', '必须更好发挥中国特色社会主义制度优势', '必须把中国特色社会主义制度优势转化为国家治理效能'], ans: [0,1,2,3] },
+      { id: 24, q: '下面哪些是全面深化改革开放必须坚持的正确方法。（ ）', type: 'multi', opts: ['增强全面深化改革的系统性、整体性、协同性', '加强顶层设计和摸着石头过河相结合', '统筹改革发展稳定', '胆子要大，步子要稳', '凡属重大改革都要于法有据'], ans: [0,1,2,3,4] },
+      { id: 25, q: '新时代全面深化改革开放，就其艰巨性、复杂性和系统性来说，是一场深刻的革命。（ ）', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 26, q: '改革是由问题倒逼而产生，改革进程中的矛盾只能用改革的办法来解决。（ ）', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 27, q: '凡属重大改革不必于法有据，需要修改法律的可以不用先修改法律，先破后立。（ ）', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 1 },
+      { id: 28, q: '中国对外开放，不是要一家唱独角戏，而是要欢迎各方共同参与；不是要谋求势力范围，而是要支持各国共同发展；不是要营造自己的后花园，而是要建设各国共享的百花园。 （ ）', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 29, q: '我国国家制度和国家治理体系的显著优势，要坚持以人民为中心的发展思想，不断保障和改善民生、增进人民福祉，走共同富裕道路的显著优势。（ ）', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 30, q: '我国构建互利共赢、多元平衡、安全高效的开放型经济体系，不断增强我国国际经济合作和竞争新优势。（ ）', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 31, q: '党的十一届三中全会是划时代的，开启了改革开放和社会主义现代化建设新时期。（ ）', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 32, q: '党的二十大指出，要推进高水平对外开放，稳步扩大规则、规制、管理、标准等制度型开放。（ ）', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 33, q: '党的二十大指出，全面建设社会主义现代化国家的前进道路上，要牢牢把握五项重大原则：坚持和加强的全面领导，坚持中国特色社会主义道路、坚持以人民为中心的发展思想、坚持深化改革开放和坚持发扬斗争精神。（ ）', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 34, q: '（ ）是当代中国最显著的特征、最壮丽的气象。', type: 'single', opts: ['改革开放', '高质量发展', '全面依法治国', '文化自信'], ans: 0 },
+      { id: 35, q: '只有社会主义才能救中国，只有（ ）才能发展中国、发展社会主义、发展马克思主义。', type: 'single', opts: ['改革开放', '社会主义', '马克思主义', '中国共产党领导'], ans: 0 },
+      { id: 36, q: '坚持和完善社会主义基本经济制度，充分发挥市场在资源配置中的（ ）作用，更好发挥政府作用。', type: 'single', opts: ['决定性', '基础性', '主导性', '辅助性'], ans: 0 },
+      { id: 37, q: '坚持和完善繁荣发展社会主义先进文化的制度，确立和坚持（ ）在意识形态领域指导地位的根本制度。', type: 'single', opts: ['马克思主义', '社会主义', '中国特色社会主义', '中华优秀传统文化'], ans: 0 },
+      { id: 38, q: '"（ ）"建设是党的十八大以来我国扩大对外开放的重大战略举措。', type: 'single', opts: ['一带一路', '改革开放', '高质量发展', '人类命运共同体'], ans: 0 }
+    ]
+  },
+  {
+    id: 6,
+    name: '第六章',
+    questions: [
+      { id: 1, q: '必须坚持( )是第一生产力。', type: 'single', opts: ['人才', '资源', '科技', '环境'], ans: 2 },
+      { id: 2, q: '( )是发展第一动力。', type: 'single', opts: ['科技', '人才', '创新', '党的领导'], ans: 2 },
+      { id: 3, q: '( )提出"科学技术是第一生产力"。', type: 'single', opts: ['毛泽东', '邓小平', '习近平', '胡锦涛'], ans: 1 },
+      { id: 4, q: '科教兴国是我国的( )。', type: 'single', opts: ['基本国策', '基本政策', '基本路线', '基本战略'], ans: 0 },
+      { id: 5, q: '( )是民族振兴、社会进步的基石。', type: 'single', opts: ['科技', '教育', '共同富裕', '人才'], ans: 1 },
+      { id: 6, q: '( )是发展教育的根本尺度。', type: 'single', opts: ['科技突破', '人民满意', '实现共同富裕', '发展生产力'], ans: 1 },
+      { id: 7, q: '( )是国家强盛之基、安全之要。', type: 'single', opts: ['科技自立自强', '人才引进', '共同富裕', '改革开放'], ans: 0 },
+      { id: 8, q: '( )是我们攀登世界科技高峰的必由之路。', type: 'single', opts: ['自主创新', '脱贫攻坚', '守正创新', '信息技术'], ans: 0 },
+      { id: 9, q: '必须坚持教育优先发展，把( )作为教育的根本任务，办好人民满意的教育。', type: 'single', opts: ['立德树人', '社会实践', '创新拔尖', '专业技术'], ans: 0 },
+      { id: 10, q: '( )是科技创新的源头。我国面临的很多"卡脖子"技术问题，根子是基础理论研究跟不上。', type: 'single', opts: ['应用研究', '国家实验室', '经济特区', '基础研究'], ans: 3 },
+      { id: 11, q: '全面建设社会主义现代化国家,( )。', type: 'multi', opts: ['教育是根本', '科技是关键', '人才是基础', '改革是保证'], ans: [0,1,2] },
+      { id: 12, q: '实施( )是增强综合国力、满足人民群众美好生活需要的必然要求，是建设教育强国、科技强国、人才强国的重大举措', type: 'multi', opts: ['科教兴国战略', '人才强国战略', '创新驱动发展战略', '"四个全面战略"'], ans: [0,1,2] },
+      { id: 13, q: '实施科教兴国战略，( )。', type: 'multi', opts: ['是应对新时代环境变化的必然要求', '是建设创新型国家的必然要求', '是应对国际竞争的有力举措', '是决胜全面小康社会的重大部署'], ans: [0,1,2] },
+      { id: 14, q: '实施人才强国战略，( )，实施更加积极、更加开放、更加有效的人才政策。', type: 'multi', opts: ['要坚持党管人才原则', '坚持尊重劳动、尊重知识、尊重人才、尊重创造', '完善人才战略布局', '深化人才发展体制机制改革'], ans: [0,1,2,3] },
+      { id: 15, q: '实施创新驱动发展战略，( )，让创新成为全社会的共同行动。', type: 'multi', opts: ['要坚持面向世界科技前沿、面向经济主战场', '要坚持面向国家重大需求、面向人民生命健康', '坚持科技创新，增强自主创新能力', '坚决打赢关键核心技术攻坚战'], ans: [0,1,2,3] },
+      { id: 16, q: '教育优先发展，要做到( )，使我国教育越办越好。', type: 'multi', opts: ['经济社会发展规划优先安排教育发展', '财政资金投入优先保障教育投入', '公共资源配置优先满足教育和人力资源开发需要', '推动健全优先发展教育事业的体制机制'], ans: [0,1,2,3] },
+      { id: 17, q: '建设教育强国是( )。', type: 'multi', opts: ['全面建成社会主义现代化强国的战略先导', '是实现高水平科技自立自强的重要支撑', '是以中国式现代化全面推进中华民族伟大复兴的基础工程', '必须把教育事业放在优先发展的战略位置'], ans: [0,1,2,3] },
+      { id: 18, q: '必须坚持教育( )。', type: 'multi', opts: ['为人民服务', '为中国共产党治国理政服务', '为巩固和发展中国特色社会主义制度服务', '为改革开放和社会主义现代化建设服务'], ans: [0,1,2,3] },
+      { id: 19, q: '落实立德树人根本任务，必须着力解决好( )的问题，这是教育的根本问题，也是( )的核心课题。', type: 'multi', opts: ['培养什么人', '怎样培养人', '为谁培养人', '建设教育强国'], ans: [0,1,2,3] },
+      { id: 20, q: '我们培养的人，( )。', type: 'multi', opts: ['要坚定共产主义远大理想和中国特色社会主义共同理想', '要有高尚的道德品质，厚植爱国主义情怀', '要养成刻苦学习的习惯', '要积极投身社会实践，增长经验和技能'], ans: [0,1,2,3] },
+      { id: 21, q: '办好人民满意的教育，( )。', type: 'multi', opts: ['大力促进教育公平', '加快建设高质量教育体系', '提升教育服务经济社会发展能力', '坚持深化教育改革创新', '坚持把教师队伍建设作为基础工作'], ans: [0,1,2,3,4] },
+      { id: 22, q: '实现高水平科技自立自强是( )。', type: 'multi', opts: ['应对风险挑战和维护国家利益的必然选择', '构建新发展格局的内在要求', '推动高质量发展的内在要求', '满足人民美好生活需要的内在要求'], ans: [0,1,2,3] },
+      { id: 23, q: '建设人才强国，必须( )。', type: 'multi', opts: ['走好人才自主培养之路', '加快建设世界重要人才中心和创新高地', '坚持党对人才工作的全面领导', '深化人才发展体制机制改革', '营造识才爱才敬才用才的环境'], ans: [0,1,2,3,4] },
+      { id: 24, q: '实现高水平科技自立自强是国家强盛和民族复兴的战略基石。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 25, q: '全面建成社会主义现代化强国关键看科技自立自强。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 26, q: '科技创新是百年未有之大变局中的一个关键变量，世界主要国家纷纷把科技创新作为国际战略博弈的主要战场。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 27, q: '把教育技术掌握在自己手中，才能真正掌握竞争和发展的主动权。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 1 },
+      { id: 28, q: '培养入才是国家和民族长远发展大计。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 29, q: '坚持党对人才工作的全面领导,这是做好人才工作的根本保证。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 30, q: '科技是富国之本、兴邦大计。科技已经成为推动社会发展最活跃、最积极的因素。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 1 },
+      { id: 31, q: '人才是国之大计、党之大计，是国家经济社会发展的支撑力量，在国家发展中始终具有基础性先导性全局性地位。', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 1 },
+      { id: 32, q: '教育、( )、人才是全面建设社会主义现代化国家的基础性、战略性支撑。', type: 'single', opts: ['科技', '教育', '人才', '创新'], ans: 0 },
+      { id: 33, q: '人才强国战略，就是要牢固树立人才资源是( )的理念。', type: 'single', opts: ['第一资源', '第一动力', '第一生产力', '第一要素'], ans: 0 },
+      { id: 34, q: '创新驱动发展战略，就是要坚持创新是( )，把创新驱动落实到现代化建设整个进程和各个方面。', type: 'single', opts: ['第一动力', '第一资源', '第一生产力', '第一要素'], ans: 0 },
+      { id: 35, q: '( )是国之大计、党之大计。', type: 'single', opts: ['教育', '科技', '人才', '创新'], ans: 0 },
+      { id: 36, q: '( )是国之利器。要加快实现高水平科技自立自强。', type: 'single', opts: ['科技', '教育', '人才', '创新'], ans: 0 },
+      { id: 37, q: '( )是实现民族振兴、赢得国际竞争主动的战略资源。', type: 'single', opts: ['人才', '教育', '科技', '创新'], ans: 0 }
+    ]
+  },
+  {
+    id: 7,
+    name: '第七章',
+    questions: [
+      { id: 1, q: '( )是党领导人民治理国家的基本方式。', type: 'single', opts: ['以人民为中心', '绿色发展', '依法治国', '人民当家作主'], ans: 2 },
+      { id: 2, q: '全面依法治国的唯一正确道路是( )。', type: 'single', opts: ['中国特色社会主义道路', '中国特色社会主义政治发展道路', '中国特色社会主义法治道路', '中国特色社会主义法制道路'], ans: 2 },
+      { id: 3, q: '全面依法治国的总抓手是( )。', type: 'single', opts: ['建设中国特色社会主义法治体系，建设社会主义法治国家', '建设中国特色社会主义法治体系', '建设社会主义法治国家', '坚持中国共产党的领导'], ans: 1 },
+      { id: 4, q: '1997年，( )确立依法治国为治理国家的基本方略，把建设社会主义法治国家，确定为社会主义现代化建设的重要目标。', type: 'single', opts: ['党的十四大', '党的十五大', '党的十三届四中全会', '党的十六大'], ans: 1 },
+      { id: 5, q: '( )是社会主义法治最根本的保证。', type: 'single', opts: ['中国特色社会主义制度', '党的领导', '严密的法治监督体系', '全面深化改革'], ans: 1 },
+      { id: 6, q: '( )是中国特色社会主义法治体系的根本制度基础，是全面推进依法治国的根本制度保障。', type: 'single', opts: ['中国特色社会主义制度', '党的领导', '马克思主义指导', '以德治国'], ans: 0 },
+      { id: 7, q: '( )是中国特色社会主义的本质要求和重要保障。', type: 'single', opts: ['全面建设社会主义现代化国家', '全面依法治国', '全面深化改革', '全面从严治党'], ans: 1 },
+      { id: 8, q: '全面依法治国的总抓手是( )。', type: 'single', opts: ['建设中国特色社会主义法治体系，建设社会主义法治国家', '建设中国特色社会主义法治体系', '建设社会主义法治国家', '坚持中国共产党的领导'], ans: 1 },
+      { id: 9, q: '法治监督体系以( )为重点。', type: 'single', opts: ['约束公权力运行', '思想教育', '制度建设', '少数领导干部'], ans: 0 },
+      { id: 10, q: '( )是推进全面依法治国的根本保证。', type: 'single', opts: ['党的领导', '人民当家作主', '社会和谐稳定', '经济社会发展'], ans: 0 },
+      { id: 11, q: '全面依法治国最广泛、最深厚的基础是( )。', type: 'single', opts: ['党的领导', '社会稳定', '人民', '社会主义民主'], ans: 2 },
+      { id: 12, q: '全面依法治国的总目标是( )。', type: 'single', opts: ['建设中国特色社会主义法治体系', '建设中国特色社会主义法治体系，建设社会主义法治国家', '建设社会主义法治国家', '有法可依、有法必依、违法必究、执法必严'], ans: 1 },
+      { id: 13, q: '( )是国家治理体系和治理能力的重要依托。', type: 'single', opts: ['法治', '民主', '人民', '党的领导'], ans: 0 },
+      { id: 14, q: '( )是司法的灵魂和生命。', type: 'single', opts: ['公平正义', '民主法治', '诚信友善', '社会和谐'], ans: 0 },
+      { id: 15, q: '( )既是全面从严治党的重要依据，也是全面依法治国的有力保障。', type: 'single', opts: ['党内法规', '党的纪律条例', '党章', '党的监督机制'], ans: 0 },
+      { id: 16, q: '( )是国家根本法，是党和人民意志的集中体现，是国家各种制度和法律法规的总依据。', type: 'single', opts: ['法律总纲', '民法典', '宪法', '诉讼法'], ans: 2 },
+      { id: 17, q: '我们讲坚持依宪治国、依宪执政，就包括坚持宪法确定的( )地位不动摇。', type: 'single', opts: ['人民当家作主', '中国共产党领导', '社会主义法治国家', '宪法权威'], ans: 1 },
+      { id: 18, q: '建设中国特色社会主义法治体系，必须坚持( )先行。', type: 'single', opts: ['守法', '司法', '执法', '立法'], ans: 3 },
+      { id: 19, q: '全面依法治国是( )。', type: 'multi', opts: ['国家治理的一场深刻革命，关系党执政兴国，关系人民幸福安康', '完善和发展中国特色社会主义制度、推进国家治理体系和治理能力现代化的重要方面', '坚持和发展中国特色社会主义的本质要求和重要保障', '"四个全面"战略布局之一'], ans: [0,1,2,3] },
+      { id: 20, q: '中国特色社会主义法治道路的核心要义是( )。', type: 'multi', opts: ['坚持党的领导', '坚持中国特色社会主义制度', '贯彻中国特色社会主义法治理论', '坚持社会主义根本制度'], ans: [0,1,2] },
+      { id: 21, q: '要坚持( )相结合，实现法治和德治相辅相成、相得益彰。', type: 'multi', opts: ['依法治国', '协同发展', '全面发展', '以德治国'], ans: [0,3] },
+      { id: 22, q: '中国特色社会主义法治道路的核心要义，就是( )，这充分体现了我国社会主义性质。', type: 'multi', opts: ['坚持党的领导', '坚持中国特色社会主义制度', '贯彻中国特色社会主义法治理论', '坚持从中国实际出发'], ans: [0,1,2] },
+      { id: 23, q: '关于政治和法治的关系，下列说法正确的是( )。', type: 'multi', opts: ['法治要脱离政治的影响，才能确保公平正义', '法治当中有政治，没有脱离政治的法治', '政治和法治相互依存，相互作用，密不可分', '党和法的关系是政治和法治关系的集中反映'], ans: [1,2,3] },
+      { id: 24, q: '走中国特色社会主义法治道路，必须长期坚持以下哪些基本原则。( )', type: 'multi', opts: ['坚持中国共产党的领导', '坚持人民主体地位', '坚持法律面前人人平等', '坚持依法治国与以德治国相结合', '从中国实际出发'], ans: [0,1,2,3,4] },
+      { id: 25, q: '全面依法治国必须正确处理( )的关系。', type: 'multi', opts: ['政治和法治', '改革和法治', '依法治国和以德治国', '依法治国和依规治党'], ans: [0,1,2,3] },
+      { id: 26, q: '正确处理改革和法治的关系 ,要做到( )。', type: 'multi', opts: ['要坚持改革决策和立法决策相统一', '立法主动适应改革需要，重大改革于法有据', '对实践证明已经比较成熟的改革经验和行之有效的改革举措，要尽快上升为法律', '对实践条件还不成熟、需要先行先试的，要按照法定程序作出授权', '对不适应改革要求的现行法律法规，要及时修改或废止'], ans: [0,1,2,3,4] },
+      { id: 27, q: '正确处理依法治国和依规治党的关系, 要做到( )。', type: 'multi', opts: ['要发挥依法治国和依规治党的互补性作用,确保党既依据宪法法律治国理政，又依据党内法规管党治党', '要正确处理党的政策和国家法律的关系，两者都是人民根本意志的反映', '党的政策是国家法律的先导和指引', '要通过法律保障党的政策有效实施'], ans: [0,1,2,3] },
+      { id: 28, q: '坚持依宪治国、依宪执政，就必须( )。', type: 'multi', opts: ['坚持宪法确定的中国共产党领导地位不动摇', '坚持宪法确定的人民民主专政的国体和人民代表大会的政体不动摇', '坚持走"宪政"道路不动摇', '学习西方"三权鼎立"制度'], ans: [0,1] },
+      { id: 29, q: '更好推进中国特色社会主义法治体系建设，必须加快形成( )，形成( )。', type: 'multi', opts: ['完备的法律规范体系', '高效的法治实施体系', '严密的法治监督体系', '有力的法治保障体系', '完善的党内法规体系'], ans: [0,1,2,3,4] },
+      { id: 30, q: '加快形成完备的法律规范体系,必须( )。', type: 'multi', opts: ['深入推进科学立法、民主立法、依法立法，统筹立改废释纂', '提高立法效率，增强立法系统性、整体性、协同性和时效性', '研究丰富立法形式，增强立法的针对性、适用性、可操作性', '推进合宪性审査工作'], ans: [0,1,2,3] },
+      { id: 31, q: '准确把握全面推进依法治国重点任务，着力推进( )。', type: 'multi', opts: ['科学立法', '严格执法', '公正司法', '全民守法'], ans: [0,1,2,3] },
+      { id: 32, q: '坚持以宪法为最高法律规范，完善以宪法为核心的中国特色社会主义法律体系，加强( )立法，把国家各项事业和各项工作纳入法制轨道。', type: 'multi', opts: ['重点领域', '突出领域', '新兴领域', '涉外领域'], ans: [0,2,3] },
+      { id: 33, q: '法治中国建设的总体目标是( )。', type: 'multi', opts: ['到2025年，党领导全面依法治国体制机制更加健全，以宪法为核心的中国特色社会主义法律体系更加完备', '到2025年，法治社会建设取得重大进展，党内法规体系更加完善', '到2025年，中国特色社会主义法治体系初步形成', '到2035年，法治国家、法治政府、法治社会基本建成'], ans: [0,1,2,3] },
+      { id: 34, q: '法治中国建设的工作布局是( )。', type: 'multi', opts: ['坚持依法治国、依法执政、依法行政共同推进', '坚持法治国家、法治政府、法治社会一体建设', '坚持统筹推进国内法治和涉外法治', '协商民主和法制宣传一体推进'], ans: [0,1,2] },
+      { id: 35, q: '建设更高水平的法治中国，必须( )。', type: 'multi', opts: ['完善以宪法为核心的中国特色社会主义法律体系', '扎实推进依法行政', '严格公正司法', '加快建设法治社会'], ans: [0,1,2,3] },
+      { id: 36, q: '党的领导和社会主义法治是一致的，社会主义法治必须坚持党的领导，党的领导必须依靠社会主义法治。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 37, q: '中国特色社会主义法治道路是社会主义法治建设成就和经验的集中体现，是建设社会主义法治国家的唯一正确道路。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 38, q: '"立善法于天下，则天下治;立善法于一国，则一国治。"全面依法治国，必须加快完善中国特色社会主义法律体系，使之更加科学完备、统一权威。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 39, q: '我们讲依宪治国、依宪执政，同西方所谓"宪政"有着本质区别，不能把二者混为一谈。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 40, q: '坚持依法执政首先要坚持依宪执政。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 41, q: '建设中国特色社会主义法治体系、建设社会主义法治国家是实现国家治理体系和治理能力现代化的必然要求，也是全面深化改革的必然要求，有利于在法治轨道上推进国家治理体系和治理能力现代化。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 42, q: '法治可以脱离一定社会经济、政治和文化所提供的社会条件。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 1 },
+      { id: 43, q: '依法治国是党领导人民治理国家的基本方式。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 44, q: '法治是是制度之治最基本最稳定最可靠的保障。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 45, q: '全面依法治国，必须始终坚持正确方向，坚定不移走( )道路。', type: 'single', opts: ['中国特色社会主义法治', '中国特色社会主义政治', '中国特色社会主义法制', '社会主义法治'], ans: 0 },
+      { id: 46, q: '中国特色社会主义法治道路的核心要义，就是要坚持党的领导，( )，贯彻中国特色社会主义法治理论。', type: 'single', opts: ['坚持中国特色社会主义制度', '坚持党的领导', '坚持人民主体地位', '坚持依法治国'], ans: 0 },
+      { id: 47, q: '坚持依法治国首先要坚持( ),坚持依法执政首先要坚持依宪执政。', type: 'single', opts: ['依宪治国', '依法治国', '依宪执政', '依法行政'], ans: 0 },
+      { id: 48, q: '全面推进依法治国总目标是( )、建设社会主义法治国家。', type: 'single', opts: ['建设中国特色社会主义法治体系', '完善和发展中国特色社会主义制度', '建设社会主义法治国家', '推进国家治理体系现代化'], ans: 0 },
+      { id: 49, q: '要围绕法治中国建设的总体目标，全面推进科学立法、严格执法、公正司法、全民守法，推动在( )上全面建设社会主义现代化国家。', type: 'single', opts: ['法治轨道', '社会主义道路', '改革开放道路', '中国特色道路'], ans: 0 },
+      { id: 50, q: '全面推进依法治国的总抓手是( )。', type: 'single', opts: ['建设中国特色社会主义法治体系', '坚持中国共产党的领导', '建设社会主义法治国家', '坚持中国特色社会主义法治道路'], ans: 0 }
+    ]
+  },
+  {
+    id: 8,
+    name: '第八章',
+    questions: [
+      { id: 1, q: '( )是我们坚持立党为公、执政为民的本质要求。', type: 'single', opts: ['增进民生福祉', '建立强大的国防', '全面依法治国', '思想政治教育'], ans: 0 },
+      { id: 2, q: '( )是我们一切工作的出发点和落脚点。', type: 'single', opts: ['构建新发展格局', '让老百姓过上好日子', '促进高质量发展', '问题导向'], ans: 1 },
+      { id: 3, q: '( )是"国之大者"。', type: 'single', opts: ['人才辈出', '建立强大的军队', '实现社会主义现代化', '让人民生活幸福'], ans: 3 },
+      { id: 4, q: '民生是人民幸福之基、社会和谐之本。带领人民群众创造幸福生活，要顺应人民群众对美好生活的向往，坚持( )的发展思想，以( )为重点，发展各项社会事业。', type: 'single', opts: ['以经济建设为中心;优先发展教育事业习交流', '以人为本;提高就业质量和人民收入水平', '以人民为中心;保障和改善民生', '以社会和谐为中心;加强社会保障体系建设'], ans: 2 },
+      { id: 5, q: '( )是政府联系群众的最终一公里。', type: 'single', opts: ['乡村人民政府', '居委会', '基层党支部', '城乡社区'], ans: 3 },
+      { id: 6, q: '基层治理是国家治理的基石，统筹推进乡镇(街道)和城乡社区治理，是实现( )的基础工程。', type: 'single', opts: ['国家治理体系和治理能力现代化', '完善适社会治理方式和治理能力', '中国特色社蚀义法详共教课学习交流', '中华民族伟大复兴'], ans: 0 },
+      { id: 7, q: '坚持以人民为中心的发展思想，在高质量发展中促进共同富裕，正确处理( )的关系，构建初次分配、再分配、三次分配协调配套的基础性制度安排。', type: 'single', opts: ['效率和公平', '收入和分配', '经济和社会', '政府和市场'], ans: 0 },
+      { id: 8, q: '( )是最大的民生工程、民心工程、根基工程，是社会稳定的重要保障。', type: 'single', opts: ['生产', '共同富裕', '就业', '生活水平'], ans: 2 },
+      { id: 9, q: '增进民生福祉是( )。', type: 'multi', opts: ['坚持立党为公、执政为民的本质要求', '社会主义生产的根本目的', '全面建设社会主义现代化国家的应有之义', '社会主义和资本主义的根本区别之一'], ans: [0,1,2,3] },
+      { id: 10, q: '在脱贫攻坚战中，推进"五个一批"工程，即( )。', type: 'multi', opts: ['发展生产脱贫一批', '易地搬迁脱贫一批', '生态补偿脱贫一批', '发展教育脱贫一批', '社会保障兜底一批'], ans: [0,1,2,3,4] },
+      { id: 11, q: '在脱贫攻坚战中，稳定实现贫困人口"两不愁三保障"，即( )。', type: 'multi', opts: ['不愁吃', '不愁穿', '义务教育', '基本医疗', '住房安全有保障。'], ans: [0,1,2,3,4] },
+      { id: 12, q: '保障和改善民生的工作思路是( )。', type: 'multi', opts: ['坚守底线', '突出重点', '完善制度', '引导预期'], ans: [0,1,2,3] },
+      { id: 13, q: '( )是保障和改善民生的重要方针。', type: 'multi', opts: ['尽力而为', '量力而行', '突出重点', '正确把握民生和发展的关系'], ans: [0,1] },
+      { id: 14, q: '( )是保障和改善民生的重要原则。', type: 'multi', opts: ['坚持人人尽责', '人人享有', '完善制度', '实事求是'], ans: [0,1] },
+      { id: 15, q: '完善分配制度，要做到( )。', type: 'multi', opts: ['构建初次分配、再分配、第三次分配协调配套的制度体系。', '努力提高劳动报酬在初次分配中的比重，健全工资合理增长机制', '探索通过土地、资本等要素使用权、收益权增加中低收入群体要素收入', '不断壮大中等收入群体', '加大税收、社保、转移支付等的调节力度'], ans: [0,1,2,3,4] },
+      { id: 16, q: '实施就业优先战略,必须( )。', type: 'multi', opts: ['健全就业公共服务体系', '完善重点群体就业支持体系', '扩大高校毕业生就业渠道', '稳定农民工等重点群体就业', '加强困难群体就业兜底帮扶'], ans: [0,1,2,3,4] },
+      { id: 17, q: '中国特色的社会保障体系把( )作为根本出发点和落脚点，推动社会保障事业不断前进。', type: 'multi', opts: ['坚持人民至上', '坚持共同富裕', '增进民生福祉', '促进社会公平'], ans: [2,3] },
+      { id: 18, q: '社会保障体系主要涉及( )等方面。', type: 'multi', opts: ['社会保险', '社会救助', '社会福利', '社会优抚'], ans: [0,1,2,3] },
+      { id: 19, q: '健全和完善社会保障体系是新时代加强社会建设的重要着力点。坚持以( )为重点，推动我国社会保障体系建设进入快车道。', type: 'multi', opts: ['增强公平性', '适应流动性', '保证可持续性', '高质量快速发展'], ans: [0,1,2] },
+      { id: 20, q: '加强和创新社会治理，就是( )。', type: 'multi', opts: ['在党的领导下，以政府为主导，以社会多元主体参与为基础', '以维护人民群众根本利益为核心', '通过合作、对话、协商、沟通等方式，依法对社会事务、社会组织和社会生活进行引导和规范，化解社会矛盾', '促进社会公平，推动社会稳定有序发展。'], ans: [0,1,2,3] },
+      { id: 21, q: '加强和创新社会治理，改进社会治理方式，要坚持( )。', type: 'multi', opts: ['系统治理', '依法治理', '综合治理', '源头治理'], ans: [0,1,2,3] },
+      { id: 22, q: '健全社会治理制度,要( )。', type: 'multi', opts: ['构建源头防控、排查梳理、纠纷化解、应急处置的社会矛盾综合治理机制', '健全公共安全体制机制，编织全方位、立体化的公共安全网', '完善社会治安综合治理体制机制系', '健全社会心理服务体系和疏导机制'], ans: [0,1,2,3] },
+      { id: 23, q: '不断创新社会治理方式 .要做到( )。', type: 'multi', opts: ['正确处理好维稳与维权、活力与秩序的关系', '运用法治思维和法治方式统筹社会力量、平衡社会利益、调节社会关系。', '强化互联网思维，推进政府决策科学化、社会治理精准化、公共服务高效化。', '坚持系统思维，综合运用专业化工作方法提升社会治理效能'], ans: [0,1,2,3] },
+      { id: 24, q: '社会建设主要包括两个方面重点:一是提高保障和改善民生水平、二是加强和创新社会治理。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 25, q: '保障和改善民生的重要原则是只要尽力而为，不要量力而行。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 1 },
+      { id: 26, q: '推进社会治理现代化的目标是建设人人有责、人人尽责、人人享有的社会治理共同体。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 27, q: '发展是解决民生问题的"总钥匙"，民生是发展的"指南针"。要在发展过程中始终注重民生、保障民生、改善民生。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 28, q: '解决人民群众最关心最直接最现实的利益问题,是保障和改善民生的重中之重。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 29, q: '人民健康是社会文明进步的基础，是民族昌盛和国家富强的重要标志，是促进人的全面发展的必然要求。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 30, q: '习近平指出，( )是我们党的根本执政理念，让人民生活幸福是"国之大者"。', type: 'single', opts: ['以人民为中心', '以经济建设为中心', '以社会和谐为中心', '以改革创新为中心'], ans: 0 },
+      { id: 31, q: '( )是人民幸福之基，事关人民的生存生活生计，事关民心所向。', type: 'single', opts: ['民生', '经济', '政治', '文化'], ans: 0 },
+      { id: 32, q: '( )是社会主义生产的根本目的。', type: 'single', opts: ['增进民生福祉', '发展社会生产力', '实现共同富裕', '建设社会主义现代化'], ans: 0 },
+      { id: 33, q: '( )是民生之源，是改善民生、实现发展成果由人民共享最重要最直接的方式。', type: 'single', opts: ['收入分配', '就业', '社会保障', '医疗保障'], ans: 0 },
+      { id: 34, q: '习近平指出:"( )是最大的民生工程、民心工程、根基工程，必须抓紧抓实抓好。"', type: 'single', opts: ['就业', '收入分配', '社会保障', '医疗保障'], ans: 0 },
+      { id: 35, q: '健全共建、( )、( )的社会治理制度，提升社会治理效能。', type: 'multi', opts: ['共治', '共享', '共建', '共创'], ans: [0,1] }
+    ]
+  },
+  {
+    id: 9,
+    name: '第九章',
+    questions: [
+      { id: 1, q: '( )是关系中华民族永续发展的根本大计。', type: 'single', opts: ['生态文明建设', '保护环境', '绿色低碳', '生物多样性'], ans: 0 },
+      { id: 2, q: '( )是工业文明发展到一定阶段的产物，是人类社会进步的重大成果。', type: 'single', opts: ['农业文明', '生态文明', '政治文明', '人类文明'], ans: 1 },
+      { id: 3, q: '以下思不是中华文明的鲜明特色和独特标识的是( )', type: 'single', opts: ['天地与我并生', '我思故我在', '而万物与我为一', '天人合一'], ans: 1 },
+      { id: 4, q: '( )，这是重要的发展理念，也是推进现代化建设的重大原则。', type: 'single', opts: ['生态文明建设', '山水林田湖草沙治理', '绿水青山就是金山银山', '人与自然和谐共生'], ans: 2 },
+      { id: 5, q: '习近平指出:"( )是最公平的公共产品，是最普惠的民生福祉。"', type: 'single', opts: ['生活环境', '社会福利', '土地', '良好的生态环境'], ans: 3 },
+      { id: 6, q: '( )把"增强绿水青山就是金山银山的意识"等写入党章。', type: 'single', opts: ['党的十八大', '党的十八届三中全会', '党的十九大', '党的二十大'], ans: 2 },
+      { id: 7, q: '( )，是全面建设社会主义现代化国家的重要目标，也是满足人民日益增长的优美生态环境需要的必然要求。', type: 'single', opts: ['建设美丽中国', '生态文明建设', '绿水青山就是金山银山', '建设美丽世界'], ans: 0 },
+      { id: 8, q: '习近平指出:"绿色发展，就其要义来讲，是要解决好( )问题。"', type: 'single', opts: ['生态环境保护', '人与自然和谐共生', '生物多样性', '美丽中国建设'], ans: 1 },
+      { id: 9, q: '科学划定自然保护地保护范围及功能分区，构建以( )为主体、自然保护区为基础、各类自然公园为补充的自然保护地体系。', type: 'single', opts: ['原始森林', '名山大川', '国家公园', '生态环境'], ans: 2 },
+      { id: 10, q: '制度的生命力在于执行，关键在( )，靠的是严管。', type: 'single', opts: ['监督', '保障', '真抓', '执行'], ans: 2 },
+      { id: 11, q: '要站在对人类文明负责的高度，秉持共商共建共享的全球治理观，携手应对气候变化、海洋污染、生物保护等全球性环境问题，实现联合国( )可持续发展目标，扎实推动全球生态文明之路行稳致远。', type: 'single', opts: ['2025年', '2030年', '2045年', '2050年'], ans: 1 },
+      { id: 12, q: '应对生态环境挑战，必须摒弃"单边主义""极端利己主义""甩锅推责"，打造( )的全球生态治理体系。', type: 'single', opts: ['命运与共', '携手合作', '多元共治', '美丽世界'], ans: 2 },
+      { id: 13, q: '( )问题是全球生态环境治理领域的突出问题，是全人类共同面临的重大挑战。', type: 'single', opts: ['人类生存', '粮食安全', '气候变化', '生态破坏'], ans: 2 },
+      { id: 14, q: '中国提前完成2020年应对气候变化和设立自然保护区相关目标，……力争2030年前实现碳达峰，努力争取( )前实现碳中和。', type: 'single', opts: ['2035年', '2045年', '2050年', '2060年'], ans: 3 },
+      { id: 15, q: '中国成功承办联合国《生物多样性公约》第( )次缔约方大会，推动国际社会达成"昆明一蒙特利尔全球生物多样性框架"等一揽子具有里程碑意义的成果,为全球生物多样性治理确定了目标、明确了途径。', type: 'single', opts: ['十五', '十七', '十八', '二十'], ans: 0 },
+      { id: 16, q: '大自然是人类赖以生存发展的基本条件，( )是全面建设社会主义现代化国家的内在要求。', type: 'multi', opts: ['尊重自然', '顺应自然', '保护自然', '融入自然'], ans: [0,1,2] },
+      { id: 17, q: '生态环境问题归根到底是( )问题。', type: 'multi', opts: ['经济发展方式', '生活方式', '社会发展方式', '教育方式'], ans: [0,1] },
+      { id: 18, q: '绿水青山既是( )，又是( )。', type: 'multi', opts: ['自然财富', '生态财富', '社会财富', '经济财富'], ans: [0,1,2,3] },
+      { id: 19, q: '坚持生态优先、绿色发展，把生态环境优势转化为( )等生态经济优势，绿水青山就变成了金山银山。', type: 'multi', opts: ['生态农业', '生态工业', '生态交通', '生态旅游'], ans: [0,1,3] },
+      { id: 20, q: '优化国土空间开发布局，严守( )三条红线，以国家重点生态功能区为支撑，实施全国重要生态系统保护和修复重大工程，筑牢国家生态安全屏障。', type: 'multi', opts: ['生态保护红线', '环境质量底线', '国土规划红线', '资源利用上线'], ans: [0,1,3] },
+      { id: 21, q: '生态环境问题，归根到底是( )造成的。', type: 'multi', opts: ['资源过度开发', '粗放利用', '奢侈消费', '生态腐败'], ans: [0,1,2] },
+      { id: 22, q: '强化国土空间规划和用途管控，划定落实( )三条控制线以及各类海域保护线。', type: 'multi', opts: ['生态保护红线', '永久基本农田', '环境科学治理', '城镇开发边界'], ans: [0,1,3] },
+      { id: 23, q: '统筹( ),加强河流和湿地生态流量管理。', type: 'multi', opts: ['水资源', '水环境', '水生态', '水安全'], ans: [0,1,2,3] },
+      { id: 24, q: '健全( )的生态环境保护体系。', type: 'multi', opts: ['源头预防', '过程控制', '损害赔偿', '责任追究'], ans: [0,1,2,3] },
+      { id: 25, q: '继续促进可持续发展，把一个清洁美丽的世界留给子孙后代，需要国际社会加强合作，秉持( )，共建地球生命共同体，共建清洁美丽世界，书写人与自然和谐共生的美好画卷。', type: 'multi', opts: ['生态文明理念', '以绿色转型为驱动', '以人民福祉为中心', '以国际法为基础'], ans: [0,1,2,3] }
+    ]
+  },
+  {
+    id: 10,
+    name: '第十章',
+    questions: [
+      { id: 1, q: '建设社会主义文化强国、推动社会主义文化繁荣兴盛，关键在于( )。', type: 'single', opts: ['坚定中国特色社会主义文化自信', '高质量发展', '提高综合国力', '贯彻新发展理念'], ans: 0 },
+      { id: 2, q: '坚持马克思主义在意识形态领域指导地位的制度是中国特色社会主义制度体系的一项( )。', type: 'single', opts: ['基本制度', '根本制度', '重要制度', '基本政策'], ans: 1 },
+      { id: 3, q: '建设中国特色社会主义文化，必须牢牢掌握( ).', type: 'single', opts: ['马克思主义的科学理论', '网络空间的治理和引导', '意识形态工作领导权', '中国特色社会主义科学体系的构建'], ans: 2 },
+      { id: 4, q: '培育和践行社会主义核心价值观，要把( )融入社会生活各个方面。', type: 'single', opts: ['社会主义核心价值体系', '理想信念、价值理念、道德观念', '中华优秀传统文化', '社会主义核心价值观'], ans: 3 },
+      { id: 5, q: '( )是一个民族赖以维系的精神纽带，是一个国家共同的思想道德基础。', type: 'single', opts: ['社会主义核心价值观', '核心价值观', '理想信念', '社会主义核心价值体系'], ans: 1 },
+      { id: 6, q: '建设社会主义文化强国，必须培养高度的( )。', type: 'single', opts: ['文化自觉', '文化自信', '文化创造活力', '文化软实力'], ans: 1 },
+      { id: 7, q: '构建中国特色哲学社会科学，是掌握意识形态工作领导权的内在要求，首要的是( )。', type: 'single', opts: ['旗帜鲜明坚持以马克思主义为指导，深化马克思主义理论研究和建设', '在学科体系、学术体系等方面体现中国特色、中国风格、中国气派', '建设中国特色新型智库', '拒绝一切来自西方哲学社会科学的影响'], ans: 0 },
+      { id: 8, q: '下列观点和认识中，错误的是 ( )。', type: 'single', opts: ['当今时代，文化在综合国力竞争中的地位日益重要，谁占据了文化发展的制高点，谁就能够更好地在激烈的国际竞争中掌握主动权', '文化强国既表现为具有高度文化素养的国民，也表现为发达的文化产业，还表现为强大的文化软实力', '文化自信是一个国家、一个民族发展中更基本、更深沉、更持久的力量。坚定文化自信，事关文化安全，事关民族精神的独立性', '文化是一种跨越国界、跨越民族、跨越时空的普适性精神力量，因此，要积极融入世界文化，完全没有必要坚守中华文化立场、走中国特色社会主义文化发展道路'], ans: 3 },
+      { id: 9, q: '( )是更基础、更广泛、更深厚的自信，是一个国家、一个民族发展中最基本、最深沉、最持久的力量。', type: 'single', opts: ['文化自信', '文化自觉', '文化软实力', '中国特色社会主义文化'], ans: 0 },
+      { id: 10, q: '一个国家、一个民族的强盛，总是以文化兴盛为支撑的，中华民族伟大复兴需要以( )发展繁荣为条件。', type: 'single', opts: ['社会主义经济', '社会主义制度', '中华文化', '社会主义文化'], ans: 2 },
+      { id: 11, q: '( )是担负文化使命、实现中华民族伟大复兴的根本保证。', type: 'single', opts: ['党的领导', '文化发展繁荣', '文化自信', '科学的民族的大众的文化'], ans: 0 },
+      { id: 12, q: '( )是当代中国文化发展的灵魂。', type: 'single', opts: ['社会主义', '马克思主义', '中国特色社会主义', '中华优秀传统文化'], ans: 1 },
+      { id: 13, q: '( )提出社会主义核心价值观。', type: 'single', opts: ['党的十七大', '党的十八大', '党的十九大', '党的二十大'], ans: 1 },
+      { id: 14, q: '( )是中华文明的智慧结晶和精华所在，是中华民族的根和魂，是我们在世界文化激荡中站稳脚跟的根基。', type: 'single', opts: ['中华优秀传统文化', '社会主义先进文化', '革命文化号', '中国特色社会主义文化'], ans: 0 },
+      { id: 15, q: '文化繁荣兴盛是( )。', type: 'multi', opts: ['实现中华民族伟大复兴的必然要求', '建设社会主义现代化强国的应有之义', '满足人民日益增长的美好生活需要的内在要求', '在世界文化激荡中站稳脚跟的基础'], ans: [0,1,2,3] },
+      { id: 16, q: '坚定中国特色社会主义文化自信的底气来自( )。', type: 'multi', opts: ['中华优秀传统文化，这是我们坚定文化自信的深厚基础', '马克思主义指导下形成的革命文化和社会主义先进文化。这是我们坚定文化自信的根本所在', '中国特色社会主义的伟大实践。这是我们坚定文化自信的不竭源泉', '世界各国文明的交流互鉴'], ans: [0,1,2] },
+      { id: 17, q: '必须坚持中国特色社会主义文化发展道路，增强文化自信，必须( )。', type: 'multi', opts: ['围绕举旗帜、聚民心、育新人、兴文化、展形象建设社会主义文化强国', '发展面向现代化、面向世界、面向未来的，民族的科学的大众的社会主义文化', '激发全民族文化创新创造活力，增强实现中华民族伟大复兴的精神力量', '以马克思主义为指导，坚守中华文化立场'], ans: [0,1,2,3] },
+      { id: 18, q: '坚持举旗帜、聚民心、育新人、兴文化、展形象。举旗帜，就是要( )。', type: 'multi', opts: ['高举马克思主义的旗帜', '高举中国特色社会主义的旗帜', '坚持不懈用习近平新时代中国特色社会主义思想武装全党、教育人民', '高举无产阶级专政的旗帜'], ans: [0,1,2] },
+      { id: 19, q: '坚持中国特色社会主义文化建设的"二为"方向，"二为"是( )。', type: 'multi', opts: ['为中国共产党治国理政服务', '为建设社会主义现代化国家', '为人民服务', '为社会主义服务'], ans: [2,3] },
+      { id: 20, q: '坚持马克思主义在意识形态领域指导地位的根本制度，必须( )。', type: 'multi', opts: ['牢牢掌握党对意识形态工作领导权', '坚持以立为本、立破并举，提高政治自觉，把意识形态阵地建设和管理工作摆在重要位置，', '全面落实意识形态工作责任制，压紧压实做好意识形态工作的政治责任。', '要切实把坚持以马克思主义为指导体现到理论武装、舆论引导、思想道德建设、文化文艺等各方面'], ans: [0,1,2,3] },
+      { id: 21, q: '意识形态工作( )。', type: 'multi', opts: ['事关党的前途命运和国家长治久安', '是党的一项极端重要的工作', '是为国家立心、为民族立魂的工作', '事关民族凝聚力和向心力'], ans: [0,1,2,3] },
+      { id: 22, q: '100多年前，中国共产党的先驱们创建了中国共产党,形成了( )的伟大建党精神。', type: 'multi', opts: ['坚持真理、坚守理想', '践行初心、担当使命', '不怕牺牲、英勇斗争', '对党忠诚、不负人民'], ans: [0,1,2,3] },
+      { id: 23, q: '中国共产党人精神谱系( )。', type: 'multi', opts: ['集中体现了党的坚定信念、根本宗旨、优良作风', '凝聚着中国共产党人艰苦奋斗、牺牲奉献、开拓进取的伟大品格', '已经深深融入党、国家、民族、人民的血脉和灵魂', '成为民族精神和时代精神的重要组成部分。'], ans: [0,1,2,3] },
+      { id: 24, q: '提高全社会文明程度,( )。', type: 'multi', opts: ['是全面建设社会主义现代化国家的重要目标', '是建设社会主义文化强国的重大任务', '要把理想信念教育作为基础性工程', '实施公民道德建设工程', '培育时代新风新貌'], ans: [0,1,2,3,4] },
+      { id: 25, q: '对待中华优秀传统文化的态度是( )。', type: 'multi', opts: ['要坚持马克思主义的立场观点方法，坚持古为今用、推陈出新，有鉴别地加以对待，有扬弃地予以继承', '要坚持创造性转化，对那些仍有借鉴价值的内涵和陈旧的表现形式加以改造，赋予其新的时代内涵', '要坚持创新性发展，就是对中华优秀传统文化的内涵加以补充、拓展、完善，增强其影响力和感召力', '要反对复古主义，也要反对历史虚无主义'], ans: [0,1,2,3] },
+      { id: 26, q: '像爱惜自己的生命一样保护好文化遗产，守护好中华文脉。因为( )。', type: 'multi', opts: ['文化遗产承载灿烂文明', '传承历史文化', '维系民族精神', '加强社会主义精神文明建设的深厚滋养'], ans: [0,1,2,3] },
+      { id: 27, q: '提高国家文化软实力，就必须( )。', type: 'multi', opts: ['使当代中国价值观念走向世界。', '要客观真实向世界讲好中国故事', '全面阐述我国的发展观、文明观、全球治理观', '加强国际传播能力建设', '加快构建中国话语和中国叙事体系'], ans: [0,1,2,3,4] },
+      { id: 28, q: '对"意识形态工作是为国家立心、为民族立魂的工作"的理解是( )。', type: 'multi', opts: ['意识形态工作事关党的前途命运和国家长治久安', '对马克思主义的信仰和社会主义道路，是中国特色社会主义文化活的灵魂', '坚持以什么思想理论为指导，关系国家的方向，关系民族的命脉', '坚持马克思主义在意识形态领域指导地位的制度是坚持和巩固我国社会主义制度、保证我国文化建设正确方向的必然要求', '意识形态上不安全，必然导致政治上的不安全'], ans: [0,1,2,3,4] },
+      { id: 29, q: '社会主义核心价值观涉及国家、社会、公民三个层面的价值要求，具体表达为( )', type: 'multi', opts: ['富强、民主、文明、和谐', '自由、民族、公正、法治', '爱国、敬业、诚信、友善', '自由、平等、公正、法治'], ans: [0,2,3] },
+      { id: 30, q: '建设社会主义文化强国，必须做到( )', type: 'multi', opts: ['培养高度的文化自信', '提升公共文化服务水平', '健全现代文化产业体系', '提高国家文化软实力'], ans: [0,1,2,3] },
+      { id: 31, q: '一个国家的文化软实力，从根本上说，取决于其核心价值观的( )。', type: 'multi', opts: ['生命力', '凝聚力', '感召力', '影响力'], ans: [0,1,2] },
+      { id: 32, q: '中华文明形成了中国人看待世界、看待社会、看待人生的独特价值体系、文化内涵和精神品质，铸就了中华民族博采众长的文化自信。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 33, q: '一个国家、一个民族的强盛，总是以文化兴盛为支撑的。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 34, q: '一个政权的瓦解往往是从思想领域开始的，政治动荡、政权更迭可能在一夜之间发生，思想演化也是转瞬即变。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 1 },
+      { id: 35, q: '文化软实力集中体现了一个国家基于文化而具有的凝聚力和生命力，以及由此产生的吸引力和影响力。在一个国家的总体实力中，国家的硬实力固然具有标志性、基础性作用( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 0 },
+      { id: 36, q: '文化的影响力首先是政治立场的影响力。( )', type: 'single', opts: ['对', '错', '以上都不正确', '以上都不正确'], ans: 1 },
+      { id: 37, q: '( )是一个国家、一个民族的灵魂。', type: 'single', opts: ['文化', '教育', '科技', '人才'], ans: 0 },
+      { id: 38, q: '( )是更基础、更广泛、更深厚的自信，是一个国家、一个民族发展中最基本、最深沉、最持久的力量。', type: 'single', opts: ['文化自信', '道路自信', '理论自信', '制度自信'], ans: 0 },
+      { id: 39, q: '( )是推动社会主义文化繁荣兴盛的唯一正确道路。', type: 'single', opts: ['中国特色社会主义文化发展道路', '中国特色社会主义政治发展道路', '中国特色社会主义法治道路', '中国特色社会主义道路'], ans: 0 },
+      { id: 40, q: '( )，( )，是繁荣发展社会主义文化的重要方针。', type: 'multi', opts: ['百花齐放', '百家争鸣', '推陈出新', '古为今用'], ans: [0,1] },
+      { id: 41, q: '习近平强调:"意识形态工作是为国家( )、为民族( )的工作。"', type: 'multi', opts: ['立心', '立魂', '立功', '立德'], ans: [0,1] },
+      { id: 42, q: '( )是我们立党立国、兴党兴国的根本指导思想。', type: 'single', opts: ['马克思主义', '社会主义', '中国特色社会主义', '中华优秀传统文化'], ans: 0 },
+      { id: 43, q: '( )是意识形态工作的主阵地、主战场、最前沿.', type: 'single', opts: ['互联网', '电视广播', '报纸杂志', '课堂教学'], ans: 0 },
+      { id: 44, q: '中华文明的突出特性连续性、( )、( )、包容性、和平性。', type: 'multi', opts: ['创新性', '统一性', '开放性', '独立性'], ans: [0,1] }
+    ]
+  },
+  {
+    id: 11,
+    name: '第十一章',
+    questions: [
+      { id: 1, q: '巩固( )是新时代坚持和发展中国特色社会主义、实现中华民族伟大复兴的战略支撑。', type: 'single', opts: ['国家安全', '习近平强军思想', '国防和强大人民军队', '综合国力'], ans: 2 },
+      { id: 2, q: '当今世界，( )仍然是时代主题，但并不太平。', type: 'single', opts: ['战争与革命', '和平与发展', '合作与发展', '合作与共赢'], ans: 1 },
+      { id: 3, q: '( )是执行党的政治任务的武装集团，党和人民所需就是军队使命任务所系。', type: 'single', opts: ['警察部队', '人民军队', '预备役', '火箭军'], ans: 1 },
+      { id: 4, q: '( )是灵魂，决定军队建设的政治方向。', type: 'single', opts: ['听党指挥', '能打胜仗', '作风优良', '纪律严明'], ans: 0 },
+      { id: 5, q: '坚持( )是人民军队永远不变的军魂。', type: 'single', opts: ['全心全意为人民服务', '强军目标', '人民至上', '党对人民军队的绝对领导'], ans: 3 },
+      { id: 6, q: '( )是核心，反映军队的根本职能和军队建设的根本指向。', type: 'single', opts: ['听党指挥', '能打胜仗', '作风优良', '纪律严明'], ans: 1 },
+      { id: 7, q: '( )是保证，关系军队的性质、宗旨、本色。', type: 'single', opts: ['听党指挥', '能打胜仗', '作风优良', '纪律严明'], ans: 2 },
+      { id: 8, q: '党的十九大提出，到( )把人民军队全面建成世界一流军队。', type: 'single', opts: ['2025年', '2035年', '2045年', '本世纪中叶'], ans: 3 },
+      { id: 9, q: '( )进一步充实了国防和军队现代化的目标任务和发展步骤，明确提出确保2027年实现建军一百年奋斗目标。', type: 'single', opts: ['党的十八届三中全会', '党的十九大', '党的十九届五中全会', '党的二十大'], ans: 2 },
+      { id: 10, q: '坚持( )，是马克思主义建党建军的一条基本原则。', type: 'single', opts: ['人民至上', '全心全意为人民服务', '党对人民军队的绝对领导', '作风优良'], ans: 2 },
+      { id: 11, q: '( )是坚持党对人民军队绝对领导的根本制度和根本实现形式，在党领导军队的一整套制度体系中处于最高层次、居于统领地位。', type: 'single', opts: ['党委(支部)统一的集体领导', '军委主席负责制', '政治委员制', '政治机关制'], ans: 1 },
+      { id: 12, q: '( )是人民军队的立军之本。', type: 'single', opts: ['政治建军', '改革强军', '科技强军', '依法治军'], ans: 0 },
+      { id: 13, q: '( )是提高实战能力的重要途径和抓手，是最直接的军事斗争准备。', type: 'single', opts: ['听党指挥', '纪律严明', '军事训练', '科学练兵'], ans: 2 },
+      { id: 14, q: '( )是实现富国和强军相统一的重要政治保障。', type: 'single', opts: ['军民情深', '人民幸福', '军政军民团结', '民族团结'], ans: 2 },
+      { id: 15, q: '坚持从严治军铁律，坚持抓住领导干部这个( )……', type: 'single', opts: ['"关键少数"', '"总钥匙"', '"总开关"', '"牛鼻子"'], ans: 0 },
+      { id: 16, q: '建设( )和发展利益相适应的巩固国防和强大人民军队，是新时代党和国家事业发展的必然要求。', type: 'multi', opts: ['同我国国际地位相称', '同国家安全', '同国家富强', '同人民幸福'], ans: [0,1] },
+      { id: 17, q: '人民军队必须坚定站在党的旗帜下,( )。', type: 'multi', opts: ['坚决听党指挥', '坚决保卫社会主义制度', '坚决维护国家政权安全', '坚决维护政治社会大局稳定'], ans: [0,1,2,3] },
+      { id: 18, q: '习近平在2012年12月中央军委扩大会议上提出,走中国特色强军之路,为建设一支( )的人民军队而奋斗。', type: 'multi', opts: ['听党指挥', '能打胜仗', '作风优良', '纪律严明'], ans: [0,1,2] },
+      { id: 19, q: '( )是军队的根本价值所在。', type: 'multi', opts: ['听党指挥', '能打仗', '打胜仗', '纪律严明'], ans: [1,2] },
+      { id: 20, q: '到2035年基本实现国防和军队现代化。这一步的关键是实现( )。', type: 'multi', opts: ['军事理论现代化', '军队组织形态现代化', '军事人员现代化', '武器装备现代化'], ans: [0,1,2,3] },
+      { id: 21, q: '党对人民军队的绝对领导，是( )。', type: 'multi', opts: ['建军之本', '立党之基', '执政之源', '强军之魂'], ans: [0,3] },
+      { id: 22, q: '新的征程上，开创国防和军队现代化新局面，必须全面推进( )、依法治军，加快把人民军队建设成为世界一流军队，以更强大的能力、更可靠的手段捍卫国家主权、安全、发展利益。', type: 'multi', opts: ['政治建军', '改革强军', '科技强军', '人才强军'], ans: [0,1,2,3] },
+      { id: 23, q: '( )，是治军带兵的铁律，也是建设强大军队的基本规律。', type: 'multi', opts: ['政治建军', '改革强军', '厉行法治', '严肃军纪'], ans: [2,3] },
+      { id: 24, q: '( )，是人民军队血性胆魄的生动写照。', type: 'multi', opts: ['敢于斗争', '敢于胜利', '一不怕苦', '二不怕死'], ans: [0,1,2,3] },
+      { id: 25, q: '在枪林弹雨的战场上，面对气焰嚣张的强大敌人，人民军队发出了"三个不相信"的英雄宣言:在革命战士面前( )!', type: 'multi', opts: ['不相信有完不成的任务', '不相信有克服不了的困难', '不相信有攻克不了的堡垒', '不相信有战胜不了的敌人'], ans: [0,1,3] }
+    ]
+  }
+];
+
+</script>
+<script>
+/* === 习思想题库 - 公共逻辑 === */
+
+// ====== localStorage 操作 ======
+
+const STORAGE_KEY = 'xixiang_wrong_book';
+const HISTORY_KEY = 'xixiang_test_history';
+
+function getWrongBook() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  } catch(e) {
+    return {};
+  }
+}
+
+function saveWrongBook(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function addWrongQuestion(unitId, questionId) {
+  const book = getWrongBook();
+  const key = unitId + '_' + questionId;
+  if (!book[key]) {
+    book[key] = { unitId, questionId, wrongCount: 1, timestamp: Date.now() };
+  } else {
+    book[key].wrongCount += 1;
+    book[key].timestamp = Date.now();
+  }
+  saveWrongBook(book);
+}
+
+function removeWrongQuestion(unitId, questionId) {
+  const book = getWrongBook();
+  const key = unitId + '_' + questionId;
+  delete book[key];
+  saveWrongBook(book);
+}
+
+function getUnitWrongQuestions(unitId) {
+  const book = getWrongBook();
+  return Object.values(book).filter(item => item.unitId === unitId);
+}
+
+function getAllWrongQuestions() {
+  const book = getWrongBook();
+  return Object.values(book);
+}
+
+function isWrongQuestion(unitId, questionId) {
+  const book = getWrongBook();
+  return !!(book[unitId + '_' + questionId]);
+}
+
+function getWrongCount(unitId, questionId) {
+  const book = getWrongBook();
+  const key = unitId + '_' + questionId;
+  return book[key] ? book[key].wrongCount : 0;
+}
+
+// ====== 测验历史 ======
+
+function saveTestHistory(unitId, score, total) {
+  try {
+    const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || {};
+    if (!history[unitId]) history[unitId] = [];
+    history[unitId].push({ score, total, percent: Math.round(score/total*100), time: Date.now() });
+    // Keep last 10 records per unit
+    if (history[unitId].length > 10) history[unitId] = history[unitId].slice(-10);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch(e) {}
+}
+
+function getTestHistory(unitId) {
+  try {
+    const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || {};
+    return history[unitId] || [];
+  } catch(e) {
+    return [];
+  }
+}
+
+// ====== 洗牌算法 (Fisher-Yates) ======
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ====== 获取 URL 参数 ======
+
+function getUrlParam(name) {
+  const url = new URL(window.location.href);
+  return url.searchParams.get(name);
+}
+
+// ====== DOM 辅助 ======
+
+function $(sel) { return document.querySelector(sel); }
+function $(sel) { return document.querySelectorAll(sel); }
+
+// ====== 格式化时间 ======
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+// ====== 获取评分等级 ======
+
+function getScoreGrade(percent) {
+  if (percent >= 90) return { text: '优秀', cls: 'excellent' };
+  if (percent >= 70) return { text: '良好', cls: 'good' };
+  if (percent >= 60) return { text: '及格', cls: 'poor' };
+  return { text: '需努力', cls: 'poor' };
+}
+
+</script>
+<script>
+// Simple page switcher - show/hide divs
+let currentPage = 'home';
+
+function go(p) {
+  currentPage = p;
+  document.getElementById('pg-home').style.display = (p === 'home') ? 'block' : 'none';
+  document.getElementById('pg-unit').style.display = (p === 'unit') ? 'block' : 'none';
+  document.getElementById('pg-wrong').style.display = (p === 'wrong') ? 'block' : 'none';
+  window.scrollTo(0, 0);
+}
+
+function goHome() { go('home'); renderHomeData(); }
+function goUnit(uid) { go('unit'); unitPage.start(uid); }
+function goWrong() { go('wrong'); wrongPage.start(); }
+
+// Hash routing
+window.addEventListener('hashchange', function() {
+  var h = location.hash;
+  if (h.indexOf('#unit/') === 0) goUnit(parseInt(h.split('/')[1]));
+  else if (h === '#wrong') goWrong();
+  else goHome();
+});
+
+// ====== HOME PAGE ======
+function renderHomeData() {
+  var total = 0;
+  UNITS.forEach(function(u) { total += u.questions.length; });
+  document.getElementById('total-count').textContent = total;
+
+  var grid = document.getElementById('unit-grid');
+  grid.innerHTML = '';
+  UNITS.forEach(function(unit) {
+    var card = document.createElement('div');
+    card.className = 'unit-card';
+    (function(uid) { card.onclick = function() { goUnit(uid); }; })(unit.id);
+    card.innerHTML = '<div class="unit-num">' + unit.id + '</div><div class="unit-title">' + unit.name + '</div><div class="unit-count">' + unit.questions.length + ' 道题</div>';
+    grid.appendChild(card);
+  });
+
+  var allWrong = getAllWrongQuestions();
+  var wc = document.getElementById('wrong-count');
+  wc.textContent = allWrong.length > 0 ? allWrong.length + ' 道错题待复习' : '暂无错题 ✓';
+  wc.style.color = allWrong.length > 0 ? '#ff6b6b' : '';
+}
+
+// ====== UNIT PAGE (stateful module) ======
+var unitPage = (function() {
+  var unit, mode, questions, currentIndex, userAnswers, submitted, skipped;
+  var testStarted, testSubmitted, timerSeconds, timerInterval, sidebarCollapsed;
+  var letters = 'ABCDEFGHIJ';
+
+  function init(uid) {
+    unit = UNITS.find(function(u) { return u.id === uid; });
+    if (!unit) { goHome(); return; }
+    mode = 'practice';
+    userAnswers = {}; submitted = {}; skipped = {};
+    currentIndex = 0; testSubmitted = false; testStarted = false;
+    sidebarCollapsed = false;
+    stopTimer();
+    document.getElementById('unit-title').textContent = unit.name;
+    updateModeUI();
+    startMode();
+  }
+
+  function toggleSidebar() {
+    sidebarCollapsed = !sidebarCollapsed;
+    var sb = document.getElementById('u-sidebar');
+    if (sidebarCollapsed) { sb.classList.add('collapsed'); document.getElementById('u-sidebar-arrow').textContent = '▶'; }
+    else { sb.classList.remove('collapsed'); document.getElementById('u-sidebar-arrow').textContent = '◀'; }
+  }
+
+  function getQuestions() {
+    var qs;
+    if (mode === 'wrong') {
+      var wrongItems = getUnitWrongQuestions(unit.id);
+      qs = [];
+      wrongItems.forEach(function(item) {
+        var q = unit.questions.find(function(q) { return q.id === item.questionId; });
+        if (q) { var c = Object.assign({}, q); c.wrongCount = item.wrongCount; qs.push(c); }
+      });
+    } else {
+      qs = unit.questions.map(function(q) { return Object.assign({}, q); });
+    }
+    qs.sort(function(a, b) { return a.type === b.type ? 0 : (a.type === 'single' ? -1 : 1); });
+    if (mode === 'test') {
+      qs = shuffle(qs).map(function(q) {
+        var s = shuffleOpts(q);
+        var c = Object.assign({}, q);
+        c.shuffledOpts = s.opts;
+        c._shuffledAns = s.ans;
+        return c;
+      });
+    }
+    return qs;
+  }
+
+  function shuffleOpts(q) {
+    var indices = q.opts.map(function(_, i) { return i; });
+    var s = shuffle(indices);
+    var newOpts = s.map(function(i) { return q.opts[i]; });
+    var newAns = Array.isArray(q.ans) ? q.ans.map(function(a) { return s.indexOf(a); }).sort(function(a, b) { return a - b; }) : s.indexOf(q.ans);
+    return {opts: newOpts, ans: newAns};
+  }
+
+  function getRealAns(q) { return (mode === 'test' && q._shuffledAns !== undefined) ? q._shuffledAns : q.ans; }
+  function getOpts(q) { return (mode === 'test' && q.shuffledOpts) ? q.shuffledOpts : q.opts; }
+
+  function startMode() {
+    userAnswers = {}; submitted = {}; skipped = {};
+    currentIndex = 0; testSubmitted = false;
+    stopTimer();
+    document.getElementById('u-timer').style.display = 'none';
+
+    if (mode === 'wrong' && getUnitWrongQuestions(unit.id).length === 0) {
+      document.getElementById('u-content').innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>本单元暂无错题！</p></div>';
+      document.getElementById('u-bottom').innerHTML = '';
+      document.getElementById('u-progress-fill').style.width = '0%';
+      document.getElementById('u-progress-text').textContent = '';
+      document.getElementById('u-sidebar-grid').innerHTML = '';
+      return;
+    }
+
+    questions = getQuestions();
+    testStarted = (mode === 'test');
+    if (testStarted) {
+      startTimer();
+      document.getElementById('u-timer').style.display = 'flex';
+    }
+    renderQuestion();
+    updateProgress();
+    renderSidebar();
+  }
+
+  function startTimer() { stopTimer(); timerSeconds = 0; updateTimerDisplay(); timerInterval = setInterval(function() { timerSeconds++; updateTimerDisplay(); }, 1000); }
+  function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+  function updateTimerDisplay() { document.getElementById('u-timer').textContent = '⏱ ' + formatTime(timerSeconds); }
+
+  function updateModeUI() {
+    var labels = {practice: '练习模式 — 选择后提交查看对错', test: '单元测验 — 全部确认后交卷出分', wrong: '单元错题 — 针对性复习'};
+    document.getElementById('u-mode-label').textContent = labels[mode];
+    ['u-btn-practice','u-btn-test','u-btn-wrong'].forEach(function(id) { document.getElementById(id).classList.remove('active'); });
+    document.getElementById('u-btn-' + mode).classList.add('active');
+  }
+
+  function switchMode(m) {
+    mode = m; updateModeUI();
+    userAnswers = {}; submitted = {}; skipped = {};
+    currentIndex = 0; testSubmitted = false;
+    stopTimer(); document.getElementById('u-timer').style.display = 'none';
+    startMode();
+  }
+
+  function renderSidebar() {
+    var grid = document.getElementById('u-sidebar-grid');
+    var html = '';
+    for (var i = 0; i < questions.length; i++) {
+      var q = questions[i], cls = 'sidebar-num';
+      if (i === currentIndex) cls += ' current';
+      else if (submitted[q.id]) cls += ' answered';
+      else if (skipped[q.id]) cls += ' skipped';
+      html += '<div class="' + cls + '" onclick="unitPage.jump(' + i + ')">' + (i + 1) + '</div>';
+    }
+    grid.innerHTML = html;
+  }
+
+  function jump(idx) { currentIndex = idx; renderQuestion(); updateProgress(); renderSidebar(); window.scrollTo(0, 0); }
+
+  function renderQuestion() {
+    if (questions.length === 0) { document.getElementById('u-content').innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>没有题目</p></div>'; return; }
+    var q = questions[currentIndex];
+    var opts = getOpts(q), realAns = getRealAns(q);
+    var isMulti = q.type === 'multi';
+    var userAns = userAnswers[q.id];
+    var submittedQ = submitted[q.id] || false;
+    var showResult = (mode === 'test') ? testSubmitted : submittedQ;
+    var hasSel = isMulti ? (Array.isArray(userAns) && userAns.length > 0) : (userAns !== undefined);
+
+    var typeLabel = isMulti ? '<span class="type-badge multi">多选题</span>' : '<span class="type-badge single">单选题</span>';
+    var optHTML = '';
+    opts.forEach(function(opt, i) {
+      var isSelected = Array.isArray(userAns) ? userAns.indexOf(i) >= 0 : (userAns === i);
+      var isCorrect = Array.isArray(realAns) ? realAns.indexOf(i) >= 0 : (realAns === i);
+      var cls = 'option-item';
+      if (showResult) { cls += ' disabled'; if (isCorrect) cls += ' correct'; else if (isSelected && !isCorrect) cls += ' wrong'; }
+      else if (isSelected) cls += ' selected';
+      var chk = isMulti ? '<span class="checkmark"></span>' : '<span class="option-letter">' + letters[i] + '</span>';
+      optHTML += '<div class="' + cls + '" data-idx="' + i + '">' + chk + '<span class="option-text">' + opt + '</span></div>';
+    });
+
+    var fbHTML = '';
+    if (showResult) {
+      if (isCorrect(userAns, realAns)) fbHTML = '<div class="feedback correct-fb show">✅ 回答正确！</div>';
+      else {
+        var cs = Array.isArray(realAns) ? realAns.map(function(a) { return letters[a] + '. ' + opts[a]; }).join('；') : letters[realAns] + '. ' + opts[realAns];
+        fbHTML = '<div class="feedback wrong-fb show">❌ 回答错误！正确答案：<strong>' + cs + '</strong></div>';
+      }
+    }
+
+    var sk = skipped[q.id] ? ' ⚑已标记' : '';
+    var wc = q.wrongCount ? '<span style="margin-left:8px;color:#C62828;font-size:0.85rem">错过' + q.wrongCount + '次</span>' : '';
+    document.getElementById('u-content').innerHTML =
+      '<div class="question-card"><span class="question-num">第 ' + (currentIndex + 1) + ' 题</span>' + typeLabel + wc +
+      (sk ? '<span style="margin-left:8px;color:#F57F17;font-size:0.85rem">' + sk + '</span>' : '') +
+      '<div class="question-text">' + q.q + '</div>' +
+      '<div style="font-size:0.85rem;color:#999;margin-bottom:8px">' + (isMulti ? '（可多选，选全所有正确答案后提交）' : '（单选，选择一个答案后提交）') + '</div>' +
+      '<div class="options-list">' + optHTML + '</div>' + fbHTML + '</div>';
+
+    if (!showResult) {
+      var items = document.querySelectorAll('#u-content .option-item');
+      items.forEach(function(item) {
+        item.addEventListener('click', function() { handleSelect(parseInt(this.dataset.idx), isMulti); });
+      });
+    }
+    renderBottom(hasSel, submittedQ);
+  }
+
+  function isCorrect(uAns, rAns) {
+    if (uAns === undefined) return false;
+    if (Array.isArray(rAns) && Array.isArray(uAns)) {
+      if (rAns.length !== uAns.length) return false;
+      var s = uAns.slice().sort(function(a, b) { return a - b; });
+      return rAns.every(function(v, i) { return v === s[i]; });
+    }
+    if (!Array.isArray(rAns) && !Array.isArray(uAns)) return uAns === rAns;
+    return false;
+  }
+
+  function handleSelect(oi, isMulti) {
+    var q = questions[currentIndex];
+    if (isMulti) {
+      var cur = userAnswers[q.id];
+      if (!Array.isArray(cur)) cur = [];
+      var idx = cur.indexOf(oi);
+      if (idx >= 0) cur.splice(idx, 1); else cur.push(oi);
+      cur.sort(function(a, b) { return a - b; });
+      userAnswers[q.id] = cur;
+    } else {
+      userAnswers[q.id] = oi;
+    }
+    delete skipped[q.id];
+    renderQuestion(); renderSidebar();
+  }
+
+  function submitCurrent() {
+    var q = questions[currentIndex], ua = userAnswers[q.id];
+    var hasSel = q.type === 'multi' ? (Array.isArray(ua) && ua.length > 0) : (ua !== undefined);
+    if (!hasSel) return;
+    submitted[q.id] = true;
+    if (mode === 'practice' || mode === 'wrong') {
+      if (!isCorrect(ua, getRealAns(q))) addWrongQuestion(unit.id, q.id);
+      else { if (isWrongQuestion(unit.id, q.id)) removeWrongQuestion(unit.id, q.id); }
+    }
+    renderQuestion(); renderSidebar();
+  }
+
+  function renderBottom(hasSel, submittedQ) {
+    var q = questions[currentIndex];
+    var isLast = currentIndex >= questions.length - 1, isFirst = currentIndex <= 0;
+    var allSub = questions.every(function(q) { return submitted[q.id]; });
+    var isSk = skipped[q.id];
+    var html = '';
+
+    if (mode === 'test' && !testSubmitted) {
+      html += '<button class="btn btn-outline" onclick="unitPage.prevQ()" ' + (isFirst ? 'disabled' : '') + '>← 上一题</button>';
+      html += '<button class="btn btn-outline btn-sm" onclick="unitPage.markSkip()" style="background:' + (isSk ? '#FFF8E1' : '#fff') + '">' + (isSk ? '已标记 ⚑' : '标记 ⚐') + '</button>';
+      var ac = questions.filter(function(q) { return submitted[q.id]; }).length;
+      html += '<span style="font-size:0.9rem;color:#666">已确认 ' + ac + '/' + questions.length + '</span>';
+      if (hasSel && !submittedQ) html += '<button class="btn btn-primary" onclick="unitPage.submitCur()">确认本题 ✓</button>';
+      else html += '<button class="btn btn-primary" onclick="unitPage.nextQ()">下一题 →</button>';
+      if (allSub) html += '<button class="btn btn-primary" onclick="unitPage.submitTest()" style="background:#C41E3A;margin-left:8px">📋 交卷</button>';
+      else { var us = questions.length - ac; html += '<button class="btn btn-outline" onclick="unitPage.submitTest()" style="margin-left:8px;color:#C62828;border-color:#C62828">交卷(' + us + '题未确认)</button>'; }
+    } else if (mode === 'test' && testSubmitted) {
+      html += '<button class="btn btn-outline" onclick="unitPage.prevQ()" ' + (isFirst ? 'disabled' : '') + '>← 上一题</button><span style="font-size:0.9rem">浏览答卷</span>';
+      html += '<button class="btn btn-primary" onclick="unitPage.nextQ()" ' + (isLast ? 'disabled' : '') + '>下一题 →</button>';
+      html += '<button class="btn btn-outline" onclick="unitPage.switchMode(\'test\')">重新测验</button>';
+    } else {
+      html += '<button class="btn btn-outline" onclick="unitPage.prevQ()" ' + (isFirst ? 'disabled' : '') + '>← 上一题</button>';
+      html += '<span style="font-size:0.9rem;color:#666">' + (currentIndex + 1) + ' / ' + questions.length + '</span>';
+      if (hasSel && !submittedQ) html += '<button class="btn btn-primary" onclick="unitPage.submitCur()">提交答案 ✓</button>';
+      else if (submittedQ) html += '<button class="btn btn-primary" onclick="' + (isLast ? 'unitPage.finishPractice()' : 'unitPage.nextQ()') + '">' + (isLast ? '完成练习 ✓' : '下一题 →') + '</button>';
+      else html += '<button class="btn btn-primary" disabled>请先选择答案</button>';
+    }
+    document.getElementById('u-bottom').innerHTML = html;
+  }
+
+  function nextQ() { if (currentIndex < questions.length - 1) { currentIndex++; renderQuestion(); updateProgress(); renderSidebar(); window.scrollTo(0, 0); } }
+  function prevQ() { if (currentIndex > 0) { currentIndex--; renderQuestion(); updateProgress(); renderSidebar(); window.scrollTo(0, 0); } }
+  function markSkip() { var q = questions[currentIndex]; skipped[q.id] = !skipped[q.id]; renderQuestion(); renderSidebar(); }
+  function updateProgress() {
+    var pct = questions.length > 0 ? Math.round((currentIndex + 1) / questions.length * 100) : 0;
+    document.getElementById('u-progress-fill').style.width = pct + '%';
+    document.getElementById('u-progress-text').textContent = '第 ' + (currentIndex + 1) + ' 题 / 共 ' + questions.length + ' 题';
+  }
+
+  function submitTest() {
+    var us = questions.filter(function(q) { return !submitted[q.id]; });
+    if (us.length > 0 && !confirm('还有 ' + us.length + ' 道题未确认，未确认的题计为错误。确定交卷？')) return;
+    us.forEach(function(q) { submitted[q.id] = true; });
+    testSubmitted = true; stopTimer(); document.getElementById('u-timer').style.display = 'none';
+    var correct = 0;
+    questions.forEach(function(q) {
+      if (isCorrect(userAnswers[q.id], getRealAns(q))) correct++; else addWrongQuestion(unit.id, q.id);
+    });
+    var total = questions.length, percent = Math.round(correct / total * 100), grade = getScoreGrade(percent);
+    saveTestHistory(unit.id, correct, total);
+    document.getElementById('u-content').innerHTML =
+      '<div class="result-card"><h2>测验完成！</h2><div class="result-score">' + correct + '<span style="font-size:1.5rem"> / ' + total + '</span></div>' +
+      '<span class="score-badge ' + grade.cls + '">' + grade.text + ' · ' + percent + '%</span>' +
+      '<div class="result-detail"><div class="result-item"><div class="num" style="color:#2E7D32">' + correct + '</div><div class="label">正确</div></div>' +
+      '<div class="result-item"><div class="num" style="color:#C62828">' + (total - correct) + '</div><div class="label">错误</div></div>' +
+      '<div class="result-item"><div class="num">' + formatTime(timerSeconds) + '</div><div class="label">用时</div></div></div></div>';
+    document.getElementById('u-bottom').innerHTML = '<button class="btn btn-outline" onclick="unitPage.reviewTest()">查看答卷</button><button class="btn btn-primary" onclick="unitPage.switchMode(\'test\')">重新测验</button>';
+    document.getElementById('u-progress-fill').style.width = '100%'; document.getElementById('u-progress-text').textContent = '';
+    document.getElementById('u-mode-label').textContent = '测验结果'; document.getElementById('u-sidebar-grid').innerHTML = '';
+  }
+
+  function reviewTest() { testSubmitted = true; currentIndex = 0; renderQuestion(); updateProgress(); renderSidebar(); document.getElementById('u-mode-label').textContent = '查看答卷'; }
+
+  function finishPractice() {
+    var correct = 0, answered = 0;
+    questions.forEach(function(q) { if (submitted[q.id]) { answered++; if (isCorrect(userAnswers[q.id], getRealAns(q))) correct++; } });
+    var grade = getScoreGrade(answered > 0 ? Math.round(correct / answered * 100) : 0);
+    document.getElementById('u-content').innerHTML =
+      '<div class="result-card"><h2>练习完成！</h2><div class="result-score">' + correct + '<span style="font-size:1.5rem"> / ' + answered + '</span></div>' +
+      '<span class="score-badge ' + grade.cls + '">已答 ' + answered + ' 题，正确 ' + correct + ' 题</span>' +
+      '<div class="result-detail"><div class="result-item"><div class="num" style="color:#2E7D32">' + correct + '</div><div class="label">正确</div></div>' +
+      '<div class="result-item"><div class="num" style="color:#C62828">' + (answered - correct) + '</div><div class="label">错误</div></div>' +
+      '<div class="result-item"><div class="num">' + (questions.length - answered) + '</div><div class="label">未答</div></div></div></div>';
+    document.getElementById('u-bottom').innerHTML = '<button class="btn btn-primary" onclick="unitPage.switchMode(\'practice\')">重新练习</button>';
+    document.getElementById('u-progress-fill').style.width = '100%'; document.getElementById('u-progress-text').textContent = '';
+  }
+
+  // Public API
+  return {
+    start: init,
+    switchMode: switchMode,
+    toggleSidebar: toggleSidebar,
+    jump: jump,
+    nextQ: nextQ, prevQ: prevQ,
+    markSkip: markSkip,
+    submitCur: submitCurrent,
+    submitTest: submitTest,
+    reviewTest: reviewTest,
+    finishPractice: finishPractice
+  };
+})();
+
+// ====== WRONG BOOK PAGE ======
+var wrongPage = (function() {
+  var wmode, wQs, wIdx, wAns, wSidebar;
+
+  function start() {
+    wmode = 'list'; wSidebar = false;
+    document.getElementById('w-btn-list').classList.add('active');
+    document.getElementById('w-btn-review').classList.remove('active');
+    document.getElementById('w-list-view').style.display = 'block';
+    document.getElementById('w-review-view').style.display = 'none';
+    renderList();
+  }
+
+  function switchWMode(m) {
+    wmode = m;
+    document.getElementById('w-btn-list').classList.toggle('active', m === 'list');
+    document.getElementById('w-btn-review').classList.toggle('active', m === 'review');
+    document.getElementById('w-list-view').style.display = (m === 'list') ? 'block' : 'none';
+    document.getElementById('w-review-view').style.display = (m === 'review') ? 'block' : 'none';
+    if (m === 'list') renderList(); else startReview();
+  }
+
+  function toggleSidebar() {
+    wSidebar = !wSidebar;
+    var sb = document.getElementById('w-sidebar');
+    if (wSidebar) { sb.classList.add('collapsed'); document.getElementById('w-sbar-arrow').textContent = '▶'; }
+    else { sb.classList.remove('collapsed'); document.getElementById('w-sbar-arrow').textContent = '◀'; }
+  }
+
+  function renderList() {
+    var allW = getAllWrongQuestions();
+    if (allW.length === 0) {
+      document.getElementById('w-list-view').innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>恭喜！没有错题</p></div>';
+      document.getElementById('w-btn-clear').style.display = 'none';
+      return;
+    }
+    document.getElementById('w-btn-clear').style.display = 'inline-flex';
+    var grouped = {};
+    allW.forEach(function(w) {
+      var unit = UNITS.find(function(u) { return u.id === w.unitId; });
+      var uname = unit ? unit.name : '未知';
+      if (!grouped[uname]) grouped[uname] = [];
+      var q = unit ? unit.questions.find(function(q) { return q.id === w.questionId; }) : null;
+      grouped[uname].push({qt: q ? q.q : '(已删除)', uname: uname, wrongCount: w.wrongCount});
+    });
+
+    var html = '';
+    for (var uname in grouped) {
+      var items = grouped[uname];
+      html += '<h3 style="margin:20px 0 10px;color:#8B0000">📌 ' + uname + ' (' + items.length + '题)</h3><div class="wrong-list">';
+      items.forEach(function(item) {
+        var sq = item.qt.length > 50 ? item.qt.substring(0, 50) + '...' : item.qt;
+        html += '<div class="wrong-item"><span class="w-icon">❌</span><div class="w-info"><div class="w-title" title="' + item.qt.replace(/"/g, '&quot;') + '">' + sq + '</div><div class="w-meta">' + item.uname + '</div></div><span class="w-count">错' + item.wrongCount + '次</span></div>';
+      });
+      html += '</div>';
+    }
+    document.getElementById('w-list-view').innerHTML = html;
+  }
+
+  function buildQs() {
+    var result = [];
+    getAllWrongQuestions().forEach(function(w) {
+      var unit = UNITS.find(function(u) { return u.id === w.unitId; });
+      if (!unit) return;
+      var q = unit.questions.find(function(q) { return q.id === w.questionId; });
+      if (q) {
+        var indices = q.opts.map(function(_, i) { return i; });
+        var s = shuffle(indices);
+        var c = Object.assign({}, q);
+        c.unitId = w.unitId; c.unitName = unit.name; c.wrongCount = w.wrongCount;
+        c.shuffledOpts = s.map(function(i) { return q.opts[i]; });
+        c._shuffledAns = Array.isArray(q.ans) ? q.ans.map(function(a) { return s.indexOf(a); }).sort(function(a, b) { return a - b; }) : s.indexOf(q.ans);
+        result.push(c);
+      }
+    });
+    return shuffle(result);
+  }
+
+  function startReview() {
+    wQs = buildQs(); wIdx = 0; wAns = {};
+    if (wQs.length === 0) {
+      document.getElementById('w-review-content').innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>没有错题可复习！</p></div>';
+      document.getElementById('w-review-bottom').innerHTML = '';
+      document.getElementById('w-sidebar-grid').innerHTML = '';
+      return;
+    }
+    renderWQ(); updateWProgress(); renderWSidebar();
+  }
+
+  function renderWSidebar() {
+    var html = '';
+    for (var i = 0; i < wQs.length; i++) {
+      var cls = 'sidebar-num';
+      if (i === wIdx) cls += ' current';
+      else if (wAns[wQs[i].id] !== undefined) cls += ' answered';
+      html += '<div class="' + cls + '" onclick="wrongPage.jump(' + i + ')">' + (i + 1) + '</div>';
+    }
+    document.getElementById('w-sidebar-grid').innerHTML = html;
+  }
+
+  function jump(i) { wIdx = i; renderWQ(); updateWProgress(); renderWSidebar(); window.scrollTo(0, 0); }
+
+  function renderWQ() {
+    var q = wQs[wIdx], opts = q.shuffledOpts || q.opts, realAns = q._shuffledAns;
+    var isMulti = q.type === 'multi', userAns = wAns[q.id], showResult = userAns !== undefined;
+    var letters = 'ABCDEFGHIJ';
+
+    var html = '<div class="question-card"><span class="question-num">第 ' + (wIdx + 1) + ' 题</span>' +
+      (isMulti ? '<span class="type-badge multi">多选</span>' : '<span class="type-badge single">单选</span>') +
+      '<span style="margin-left:8px;color:#999;font-size:0.85rem">' + q.unitName + ' · 错过' + q.wrongCount + '次</span>' +
+      '<div class="question-text">' + q.q + '</div>' +
+      '<div style="font-size:0.85rem;color:#999;margin-bottom:8px">' + (isMulti ? '（可多选）' : '（单选）') + '</div>' +
+      '<div class="options-list">';
+
+    opts.forEach(function(opt, i) {
+      var isSelected = Array.isArray(userAns) ? userAns.indexOf(i) >= 0 : (userAns === i);
+      var isCorrect = Array.isArray(realAns) ? realAns.indexOf(i) >= 0 : (realAns === i);
+      var cls = 'option-item';
+      if (showResult) { cls += ' disabled'; if (isCorrect) cls += ' correct'; else if (isSelected && !isCorrect) cls += ' wrong'; }
+      else if (isSelected) cls += ' selected';
+      html += '<div class="' + cls + '" data-idx="' + i + '">' +
+        (isMulti ? '<span class="checkmark"></span>' : '<span class="option-letter">' + letters[i] + '</span>') +
+        '<span class="option-text">' + opt + '</span></div>';
+    });
+
+    html += '</div>';
+    if (showResult) {
+      if (wIsCorrect(userAns, realAns)) html += '<div class="feedback correct-fb show">✅ 正确！已从错题本移除</div>';
+      else {
+        var cs = Array.isArray(realAns) ? realAns.map(function(a) { return letters[a] + '. ' + opts[a]; }).join('；') : letters[realAns] + '. ' + opts[realAns];
+        html += '<div class="feedback wrong-fb show">❌ 错误！正确答案：<strong>' + cs + '</strong></div>';
+      }
+    }
+    html += '</div>';
+    document.getElementById('w-review-content').innerHTML = html;
+
+    if (!showResult) {
+      document.querySelectorAll('#w-review-content .option-item').forEach(function(item) {
+        item.addEventListener('click', function() { wHandleAns(parseInt(this.dataset.idx), isMulti); });
+      });
+    }
+    renderWBottom();
+  }
+
+  function wIsCorrect(u, r) {
+    if (u === undefined) return false;
+    if (Array.isArray(r) && Array.isArray(u)) { if (r.length !== u.length) return false; var s = u.slice().sort(function(a, b) { return a - b; }); return r.every(function(v, i) { return v === s[i]; }); }
+    if (!Array.isArray(r) && !Array.isArray(u)) return u === r;
+    return false;
+  }
+
+  function wHandleAns(oi, isMulti) {
+    var q = wQs[wIdx], ra = q._shuffledAns;
+    if (isMulti) {
+      var cur = wAns[q.id]; if (!Array.isArray(cur)) cur = [];
+      var idx = cur.indexOf(oi); if (idx >= 0) cur.splice(idx, 1); else cur.push(oi);
+      cur.sort(function(a, b) { return a - b; }); wAns[q.id] = cur;
+    } else {
+      wAns[q.id] = oi;
+      if (wIsCorrect(oi, ra)) {
+        removeWrongQuestion(q.unitId, q.id);
+        wQs = buildQs();
+        if (wQs.length === 0) {
+          document.getElementById('w-review-content').innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>全部错题已清除！</p></div>';
+          document.getElementById('w-review-bottom').innerHTML = ''; updateWProgress(); document.getElementById('w-sidebar-grid').innerHTML = '';
+          return;
+        }
+        if (wIdx >= wQs.length) wIdx = wQs.length - 1;
+      } else { addWrongQuestion(q.unitId, q.id); }
+    }
+    renderWQ(); renderWSidebar();
+  }
+
+  function renderWBottom() {
+    var isLast = wIdx >= wQs.length - 1;
+    var html = '<button class="btn btn-outline" onclick="wrongPage.prev()" ' + (wIdx <= 0 ? 'disabled' : '') + '>← 上一题</button>';
+    html += '<span style="font-size:0.9rem;color:#666">' + (wIdx + 1) + ' / ' + wQs.length + '</span>';
+    if (isLast) html += '<button class="btn btn-primary" onclick="wrongPage.finish()">完成 ✓</button>';
+    else html += '<button class="btn btn-primary" onclick="wrongPage.next()">下一题 →</button>';
+    document.getElementById('w-review-bottom').innerHTML = html;
+  }
+
+  function wNext() { if (wIdx < wQs.length - 1) { wIdx++; renderWQ(); updateWProgress(); renderWSidebar(); window.scrollTo(0, 0); } }
+  function wPrev() { if (wIdx > 0) { wIdx--; renderWQ(); updateWProgress(); renderWSidebar(); window.scrollTo(0, 0); } }
+  function updateWProgress() {
+    if (wQs.length === 0) { document.getElementById('w-progress-fill').style.width = '0%'; document.getElementById('w-progress-text').textContent = ''; return; }
+    document.getElementById('w-progress-fill').style.width = Math.round((wIdx + 1) / wQs.length * 100) + '%';
+    document.getElementById('w-progress-text').textContent = '第 ' + (wIdx + 1) + ' 题 / 共 ' + wQs.length + ' 题';
+  }
+
+  function wFinish() {
+    var remaining = getAllWrongQuestions().length;
+    document.getElementById('w-review-content').innerHTML = '<div class="result-card"><h2>复习完成！</h2><p style="margin:16px 0;font-size:1.2rem">剩余错题: <strong style="color:#C62828;font-size:2.5rem">' + remaining + '</strong> 道</p>' + (remaining === 0 ? '<p style="color:#2E7D32;font-weight:600;font-size:1.1rem">🎉 全部掌握！</p>' : '<p>继续加油！</p>') + '</div>';
+    document.getElementById('w-review-bottom').innerHTML = '<button class="btn btn-primary" onclick="wrongPage.startReview()">再次复习</button>';
+  }
+
+  function clearAll() { if (confirm('确定清空所有错题记录？不可撤销。')) { localStorage.removeItem('xixiang_wrong_book'); renderList(); } }
+
+  return {
+    start: start,
+    switchMode: switchWMode,
+    toggleSidebar: toggleSidebar,
+    jump: jump,
+    next: wNext, prev: wPrev,
+    finish: wFinish,
+    clearAll: clearAll,
+    startReview: startReview
+  };
+})();
+
+// ====== Keyboard ======
+document.addEventListener('keydown', function(e) {
+  if (currentPage !== 'unit') return;
+
+  try {
+    var q = unitPage._q ? unitPage._q() : null;
+    if (!q) return;
+    // Keyboard handling done via inline onclick bindings
+  } catch(ex) {}
+});
+
+// Init
+(function init() {
+  var h = location.hash;
+  if (h.indexOf('#unit/') === 0) goUnit(parseInt(h.split('/')[1]));
+  else if (h === '#wrong') goWrong();
+  else goHome();
+})();
+
+</script>
+
+</body>
+</html>
