@@ -160,3 +160,43 @@ function clearUnitProgress(unitId) {
 function hasUnitProgress(unitId) {
   return loadUnitProgress(unitId) !== null;
 }
+
+// ====== VIP Password Gate ======
+
+var VIP_PASSWORD = '1739819660';
+var VIP_UNLOCKED_KEY = 'xisixiang_vip_unlocked';
+
+function isVipUnit(uid) {
+  return uid >= 12;
+}
+
+function isVipUnlocked() {
+  try { return localStorage.getItem(VIP_UNLOCKED_KEY) === '1'; } catch(e) { return false; }
+}
+
+function unlockVip() {
+  try { localStorage.setItem(VIP_UNLOCKED_KEY, '1'); } catch(e) {}
+}
+
+function promptVipPassword(callback) {
+  var pwd = prompt('🔒 VIP套题需要输入访问密码：');
+  if (pwd === VIP_PASSWORD) {
+    unlockVip();
+    alert('✅ 密码正确，已解锁VIP套题！');
+    if (callback) callback();
+  } else if (pwd !== null) {
+    alert('❌ 密码错误，请重试。');
+  }
+}
+
+// Find unit in both UNITS and VIP_UNITS
+function findUnit(uid) {
+  var found = null;
+  if (typeof UNITS !== 'undefined') {
+    found = UNITS.find(function(u) { return u.id === uid; });
+  }
+  if (!found && typeof VIP_UNITS !== 'undefined') {
+    found = VIP_UNITS.find(function(u) { return u.id === uid; });
+  }
+  return found;
+}
