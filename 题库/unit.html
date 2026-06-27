@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>习思想题库 - 单元练习</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <h1 id="unit-title">单元练习</h1>
+  <div class="subtitle" id="mode-label">练习模式</div>
+</header>
+
+<nav class="nav-bar">
+  <a href="index.html" class="nav-back">← 返回首页</a>
+  <span style="flex:1"></span>
+  <span class="timer" id="timer" style="display:none">⏱ 00:00</span>
+</nav>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-toggle" onclick="toggleSidebar()">
+      <span>📋 题目导航</span>
+      <span id="sidebar-arrow">◀</span>
+    </div>
+    <div class="sidebar-grid" id="sidebar-grid"></div>
+    <div class="sidebar-legend">
+      <span><span class="legend-dot cur"></span>当前</span>
+      <span><span class="legend-dot ans"></span>已答</span>
+      <span><span class="legend-dot skip"></span>标记</span>
+      <span><span class="legend-dot unans"></span>未答</span>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-area">
+    <div class="mode-select">
+      <button class="mode-btn active" data-mode="practice" id="btn-practice">
+        <span class="icon">📝</span> 练习模式
+      </button>
+      <button class="mode-btn" data-mode="test" id="btn-test">
+        <span class="icon">📋</span> 单元测验
+      </button>
+      <button class="mode-btn" data-mode="wrong" id="btn-wrong">
+        <span class="icon">📌</span> 单元错题
+      </button>
+    </div>
+
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-text" id="progress-text"></div>
+
+    <div id="content-area"></div>
+    <div class="bottom-bar" id="bottom-bar"></div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+// ====== State ======
+const unitId = parseInt(getUrlParam('unit')) || 1;
+const unit = UNITS.find(u => u.id === unitId);
+if (!unit) { document.body.innerHTML = '<div class="container"><div class="empty-state"><div class="icon">❌</div><p>单元不存在</p></div></div>'; throw new Error('Unit not found'); }
+
+let mode = 'practice';
+let questions = [];
+let sections = [];           // [{type, label, start, end}]
+let currentIndex = 0;
+let userAnswers = {};       // {qid: optionIndex} or {qid: [indices]}
+let submittedQuestions = {}; // {qid: true} — has the user submitted this question?
+let skippedQuestions = {};   // {qid: true}
+let testStarted = false;
+let testSubmitted = false;
+let timerSeconds = 0;
+let timerInterval = null;
+let sidebarCollapsed = false;
+
+$('#unit-title').textContent = unit.name;
+updateModeUI();
+
+// ====== Sidebar ======
+function toggleSidebar() {
+  sidebarCollapsed = !sidebarCollapsed;
+  const sb = $('#sidebar');
+  if (sidebarCollapsed) { sb.classList.add('collapsed'); $('#sidebar-arrow').textContent = '▶'; }
+  else { sb.classList.remove('collapsed'); $('#sidebar-arrow').textContent = '◀'; }
+}
+
+function renderSidebar() {
+  const grid = $('#sidebar-grid');
+  if (!grid) return;
+  let html = '';
+  for (let i = 0; i < questions.length; i++) {
+    // Section header at group start
+    const sec = sections.find(s => s.start === i);
+    if (sec) {
+      html += `<div class="sidebar-section">📌 ${sec.label} (${sec.end - sec.start + 1}题)</div>`;
+    }
+    const q = questions[i];
+    let cls = 'sidebar-num';
+    if (i === currentIndex) cls += ' current';
+    else if (submittedQuestions[q.id]) cls += ' answered';
+    else if (skippedQuestions[q.id]) cls += ' skipped';
+    const typeLabel = q.type === 'multi' ? '多选' : q.type === 'judge' ? '判断' : '单选';
+    html += `<div class="${cls}" onclick="jumpTo(${i})" title="第${i+1}题 ${typeLabel}">${i+1}</div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function jumpTo(index) {
+  currentIndex = index;
+  renderQuestion();
+  updateProgress();
+  renderSidebar();
+  autoSave();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ====== Questions (single first, then multi) ======
+function getQuestions() {
+  let qs;
+  if (mode === 'wrong') {
+    const wrongItems = getUnitWrongQuestions(unitId);
+    qs = [];
+    wrongItems.forEach(item => {
+      const q = unit.questions.find(q => q.id === item.questionId);
+      if (q) qs.push({...q, wrongCount: item.wrongCount});
+    });
+  } else {
+    // Clone all questions
+    qs = unit.questions.map(q => ({...q}));
+  }
+
+  // Sort: single first, then multi, then judge
+  const typeOrder = { single: 0, multi: 1, judge: 2 };
+  qs.sort((a, b) => {
+    if (a.type === b.type) return 0;
+    return (typeOrder[a.type] || 0) - (typeOrder[b.type] || 0);
+  });
+
+  if (mode === 'test') {
+    // Shuffle within each type group to preserve section grouping
+    qs = qs.map(q => {
+      const s = shuffleOpts(q);
+      return {...q, shuffledOpts: s.opts, _shuffledAns: s.ans};
+    });
+    // Group by type, shuffle within each group, then concatenate
+    const groups = { single: [], multi: [], judge: [] };
+    qs.forEach(q => groups[q.type] ? groups[q.type].push(q) : groups['single'].push(q));
+    qs = [];
+    ['single', 'multi', 'judge'].forEach(t => {
+      if (groups[t]) qs = qs.concat(shuffle(groups[t]));
+    });
+  }
+
+  // Compute section boundaries
+  const typeLabels = { single: '单选题', multi: '多选题', judge: '判断题' };
+  sections = [];
+  if (qs.length > 0) {
+    let sectionStart = 0;
+    for (let i = 1; i <= qs.length; i++) {
+      if (i === qs.length || qs[i].type !== qs[sectionStart].type) {
+        const t = qs[sectionStart].type;
+        sections.push({ type: t, label: typeLabels[t] || t, start: sectionStart, end: i - 1 });
+        sectionStart = i;
+      }
+    }
+  }
+
+  return qs;
+}
+
+function shuffleOpts(q) {
+  const indices = q.opts.map((_, i) => i);
+  const s = shuffle(indices);
+  const newOpts = s.map(i => q.opts[i]);
+  const newAns = Array.isArray(q.ans)
+    ? q.ans.map(a => s.indexOf(a)).sort((a,b) => a-b)
+    : s.indexOf(q.ans);
+  return { opts: newOpts, ans: newAns };
+}
+
+function getRealAns(q) {
+  if (mode === 'test' && q._shuffledAns !== undefined) return q._shuffledAns;
+  return q.ans;
+}
+
+function getDisplayOpts(q) {
+  if (mode === 'test' && q.shuffledOpts) return q.shuffledOpts;
+  return q.opts;
+}
+
+// ====== Mode ======
+function startMode() {
+  clearUnitProgress(unitId);
+  userAnswers = {};
+  submittedQuestions = {};
+  skippedQuestions = {};
+  currentIndex = 0;
+  testSubmitted = false;
+  stopTimer();
+  timerSeconds = 0;
+  $('#timer').style.display = 'none';
+  updateModeUI();
+
+  if (mode === 'wrong') {
+    const wrongItems = getUnitWrongQuestions(unitId);
+    if (wrongItems.length === 0) {
+      $('#content-area').innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>本单元暂无错题！</p></div>';
+      $('#bottom-bar').innerHTML = '';
+      $('#progress-fill').style.width = '0%';
+      $('#progress-text').textContent = '';
+      $('#sidebar-grid').innerHTML = '';
+      return;
+    }
+  }
+
+  questions = getQuestions();
+  testStarted = (mode === 'test');
+  if (testStarted) { startTimer(); $('#timer').style.display = 'flex'; }
+  renderQuestion();
+  updateProgress();
+  renderSidebar();
+}
+
+function startTimer(initialSeconds) {
+  stopTimer();
+  timerSeconds = initialSeconds || 0;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timerSeconds++;
+    updateTimerDisplay();
+    // Auto-save every 15 seconds in test mode
+    if (timerSeconds % 15 === 0 && !testSubmitted) autoSave();
+  }, 1000);
+}
+function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+function updateTimerDisplay() { $('#timer').textContent = '⏱ ' + formatTime(timerSeconds); }
+
+// ====== Render ======
+function renderQuestion() {
+  if (questions.length === 0) {
+    $('#content-area').innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>没有题目</p></div>';
+    return;
+  }
+
+  const q = questions[currentIndex];
+  const opts = getDisplayOpts(q);
+  const realAns = getRealAns(q);
+  const isMulti = q.type === 'multi';
+  const isJudge = q.type === 'judge';
+  const userAns = userAnswers[q.id];
+  const hasSelection = isMulti ? (Array.isArray(userAns) && userAns.length > 0) : (userAns !== undefined);
+  const submitted = submittedQuestions[q.id] || false;
+  // In practice/wrong mode: show result after submitting each question
+  // In test mode: show result only after full test submission
+  const showResult = (mode === 'test') ? testSubmitted : submitted;
+  const letters = 'ABCDEFGHIJ'.split('');
+
+  let typeLabel;
+  if (isMulti) typeLabel = '<span class="type-badge multi">多选题</span>';
+  else if (isJudge) typeLabel = '<span class="type-badge judge">判断题</span>';
+  else typeLabel = '<span class="type-badge single">单选题</span>';
+
+  let optionsHTML = '';
+  opts.forEach((opt, i) => {
+    let isSelected = Array.isArray(userAns) ? userAns.includes(i) : (userAns === i);
+    let isCorrect = Array.isArray(realAns) ? realAns.includes(i) : (realAns === i);
+
+    let cls = 'option-item';
+    if (showResult) {
+      cls += ' disabled';
+      if (isCorrect) cls += ' correct';
+      else if (isSelected && !isCorrect) cls += ' wrong';
+    } else if (isSelected) {
+      cls += ' selected';
+    }
+
+    const checkHTML = isMulti
+      ? `<span class="checkmark"></span>`
+      : `<span class="option-letter">${letters[i]}</span>`;
+
+    optionsHTML += `<div class="${cls}" data-idx="${i}">${checkHTML}<span class="option-text">${opt}</span></div>`;
+  });
+
+  let feedbackHTML = '';
+  if (showResult) {
+    const correct = isAnswerCorrect(userAns, realAns);
+    if (correct) {
+      feedbackHTML = '<div class="feedback correct-fb show">✅ 回答正确！</div>';
+    } else {
+      let correctStr = Array.isArray(realAns)
+        ? realAns.map(a => letters[a] + '. ' + opts[a]).join('；')
+        : letters[realAns] + '. ' + opts[realAns];
+      feedbackHTML = `<div class="feedback wrong-fb show">❌ 回答错误！正确答案：<strong>${correctStr}</strong></div>`;
+    }
+  }
+
+  const skipped = skippedQuestions[q.id] ? ' ⚑已标记' : '';
+  const answered = submitted ? ' ✅已提交' : '';
+
+  $('#content-area').innerHTML = `
+    <div class="question-card">
+      <span class="question-num">第 ${currentIndex + 1} 题</span>
+      ${typeLabel}
+      ${q.wrongCount ? `<span style="margin-left:8px;color:#C62828;font-size:0.85rem">错过${q.wrongCount}次</span>` : ''}
+      ${skipped ? `<span style="margin-left:8px;color:#F57F17;font-size:0.85rem">${skipped}</span>` : ''}
+      <div class="question-text">${q.q}</div>
+      <div style="font-size:0.85rem;color:#999;margin-bottom:8px">${isMulti ? '（可多选，选全所有正确答案后提交）' : isJudge ? '（判断对错，选择后提交）' : '（单选，选择一个答案后提交）'}</div>
+      <div class="options-list">${optionsHTML}</div>
+      ${feedbackHTML}
+    </div>
+  `;
+
+  // Bind option clicks
+  if (!showResult) {
+    $$('.option-item').forEach(item => {
+      item.addEventListener('click', function() {
+        handleSelect(parseInt(this.dataset.idx), isMulti);
+      });
+    });
+  }
+
+  renderBottomBar(hasSelection, submitted);
+}
+
+function isAnswerCorrect(userAns, realAns) {
+  if (userAns === undefined) return false;
+  if (Array.isArray(realAns) && Array.isArray(userAns)) {
+    if (realAns.length !== userAns.length) return false;
+    const s = [...userAns].sort((a,b) => a-b);
+    return realAns.every((v,i) => v === s[i]);
+  }
+  if (!Array.isArray(realAns) && !Array.isArray(userAns)) return userAns === realAns;
+  return false;
+}
+
+// ====== Selection (no feedback yet) ======
+function handleSelect(optionIndex, isMulti) {
+  const q = questions[currentIndex];
+
+  if (isMulti) {
+    let cur = userAnswers[q.id];
+    if (!Array.isArray(cur)) cur = [];
+    const idx = cur.indexOf(optionIndex);
+    if (idx >= 0) cur.splice(idx, 1);
+    else cur.push(optionIndex);
+    cur.sort((a,b) => a-b);
+    userAnswers[q.id] = cur;
+  } else {
+    userAnswers[q.id] = optionIndex;
+  }
+
+  delete skippedQuestions[q.id];
+  renderQuestion();
+  renderSidebar();
+  autoSave();
+}
+
+// ====== Submit current question (practice/wrong mode) ======
+function submitCurrent() {
+  const q = questions[currentIndex];
+  const realAns = getRealAns(q);
+  const userAns = userAnswers[q.id];
+
+  // Guard: must have selection
+  const hasSelection = q.type === 'multi'
+    ? (Array.isArray(userAns) && userAns.length > 0)
+    : (userAns !== undefined);
+  if (!hasSelection) return;
+
+  submittedQuestions[q.id] = true;
+
+  // Record wrong in practice/wrong mode
+  if (mode === 'practice' || mode === 'wrong') {
+    if (!isAnswerCorrect(userAns, realAns)) {
+      addWrongQuestion(unitId, q.id);
+    } else {
+      if (isWrongQuestion(unitId, q.id)) removeWrongQuestion(unitId, q.id);
+    }
+  }
+
+  renderQuestion();
+  renderSidebar();
+  autoSave();
+}
+
+// ====== Bottom Bar ======
+function renderBottomBar(hasSelection, submitted) {
+  const q = questions[currentIndex];
+  const isLast = currentIndex >= questions.length - 1;
+  const isFirst = currentIndex <= 0;
+  const isSkipped = skippedQuestions[q.id];
+  const allSubmitted = questions.every(q => submittedQuestions[q.id]);
+
+  let html = '';
+
+  if (mode === 'test' && !testSubmitted) {
+    // ---- Test mode, still answering ----
+    html += `<button class="btn btn-outline" onclick="prevQuestion()" ${isFirst?'disabled':''}>← 上一题</button>`;
+    html += `<button class="btn btn-outline btn-sm" onclick="markSkip()" style="background:${isSkipped?'#FFF8E1':''}">${isSkipped?'已标记 ⚑':'标记 ⚐'}</button>`;
+
+    const answeredCount = questions.filter(q => submittedQuestions[q.id]).length;
+    const unansweredCount = questions.length - answeredCount;
+    html += `<span style="font-size:0.9rem;color:#666">已答 ${answeredCount}/${questions.length}${unansweredCount>0?'（剩'+unansweredCount+'题未答）':''}</span>`;
+
+    // "提交本题" button
+    if (hasSelection && !submitted) {
+      html += `<button class="btn btn-primary" onclick="submitCurrent()">确认本题 ✓</button>`;
+    } else if (submitted) {
+      html += `<button class="btn btn-primary" onclick="nextQuestion()">下一题 →</button>`;
+    } else {
+      html += `<button class="btn btn-primary" onclick="nextQuestion()">下一题 →</button>`;
+    }
+
+    // "交卷" - always visible, but warns if not all submitted
+    if (allSubmitted) {
+      html += `<button class="btn btn-primary" onclick="submitTest()" style="background:#C41E3A;margin-left:8px">📋 交卷</button>`;
+    } else {
+      const unsubCount = questions.length - questions.filter(q => submittedQuestions[q.id]).length;
+      html += `<button class="btn btn-outline" onclick="submitTest()" style="margin-left:8px;color:#C62828;border-color:#C62828" title="还有${unsubCount}题未确认">交卷(${unsubCount}题未确认)</button>`;
+    }
+
+  } else if (mode === 'test' && testSubmitted) {
+    // ---- Test mode, reviewing results ----
+    html += `<button class="btn btn-outline" onclick="prevQuestion()" ${isFirst?'disabled':''}>← 上一题</button>`;
+    html += `<span style="font-size:0.9rem">浏览答卷</span>`;
+    html += `<button class="btn btn-primary" onclick="nextQuestion()" ${isLast?'disabled':''}>下一题 →</button>`;
+    html += `<button class="btn btn-outline" onclick="startMode()">重新测验</button>`;
+
+  } else {
+    // ---- Practice / Wrong mode ----
+    html += `<button class="btn btn-outline" onclick="prevQuestion()" ${isFirst?'disabled':''}>← 上一题</button>`;
+    html += `<span style="font-size:0.9rem;color:#666">${currentIndex+1} / ${questions.length}</span>`;
+
+    if (hasSelection && !submitted) {
+      // Has selected but not submitted → show submit button
+      html += `<button class="btn btn-primary" onclick="submitCurrent()">提交答案 ✓</button>`;
+    } else if (submitted) {
+      // Already submitted → show next button
+      if (isLast) {
+        html += `<button class="btn btn-primary" onclick="finishPractice()">完成练习 ✓</button>`;
+      } else {
+        html += `<button class="btn btn-primary" onclick="nextQuestion()">下一题 →</button>`;
+      }
+    } else {
+      // No selection yet
+      html += `<button class="btn btn-primary" disabled>请先选择答案</button>`;
+    }
+  }
+
+  $('#bottom-bar').innerHTML = html;
+}
+
+function nextQuestion() {
+  if (currentIndex < questions.length - 1) {
+    currentIndex++;
+    renderQuestion();
+    updateProgress();
+    renderSidebar();
+    autoSave();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function prevQuestion() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderQuestion();
+    updateProgress();
+    renderSidebar();
+    autoSave();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function markSkip() {
+  const q = questions[currentIndex];
+  skippedQuestions[q.id] = !skippedQuestions[q.id];
+  renderQuestion();
+  renderSidebar();
+  autoSave();
+}
+
+function updateProgress() {
+  const pct = questions.length > 0 ? Math.round((currentIndex + 1) / questions.length * 100) : 0;
+  $('#progress-fill').style.width = pct + '%';
+  // Find current section
+  let secInfo = '';
+  if (questions.length > 0) {
+    const sec = sections.find(s => currentIndex >= s.start && currentIndex <= s.end);
+    if (sec) {
+      const localIdx = currentIndex - sec.start + 1;
+      const secTotal = sec.end - sec.start + 1;
+      secInfo = ` ｜ ${sec.label} ${localIdx}/${secTotal}`;
+    }
+  }
+  $('#progress-text').textContent = `第 ${currentIndex + 1} 题 / 共 ${questions.length} 题${secInfo}`;
+}
+
+// ====== Submit Test ======
+function submitTest() {
+  clearUnitProgress(unitId);
+  // Check all submitted
+  const unanswered = questions.filter(q => !submittedQuestions[q.id]);
+  if (unanswered.length > 0) {
+    if (!confirm(`还有 ${unanswered.length} 道题未确认答案，未确认的题将计为错误。确定交卷？`)) return;
+    // Auto-mark unanswered as submitted with empty answer
+    unanswered.forEach(q => { if (!userAnswers[q.id]) userAnswers[q.id] = undefined; submittedQuestions[q.id] = true; });
+  }
+
+  testSubmitted = true;
+  stopTimer();
+  $('#timer').style.display = 'none';
+
+  let correct = 0;
+  questions.forEach(q => {
+    const realAns = getRealAns(q);
+    const userAns = userAnswers[q.id];
+    if (isAnswerCorrect(userAns, realAns)) {
+      correct++;
+    } else {
+      addWrongQuestion(unitId, q.id);
+    }
+  });
+
+  const total = questions.length;
+  const percent = Math.round(correct / total * 100);
+  const grade = getScoreGrade(percent);
+  saveTestHistory(unitId, correct, total);
+
+  $('#content-area').innerHTML = `
+    <div class="result-card">
+      <h2>测验完成！</h2>
+      <div class="result-score">${correct}<span style="font-size:1.5rem"> / ${total}</span></div>
+      <span class="score-badge ${grade.cls}">${grade.text} · ${percent}%</span>
+      <div class="result-detail">
+        <div class="result-item"><div class="num" style="color:#2E7D32">${correct}</div><div class="label">正确</div></div>
+        <div class="result-item"><div class="num" style="color:#C62828">${total-correct}</div><div class="label">错误</div></div>
+        <div class="result-item"><div class="num">${formatTime(timerSeconds)}</div><div class="label">用时</div></div>
+      </div>
+    </div>
+  `;
+
+  $('#bottom-bar').innerHTML = `
+    <button class="btn btn-outline" onclick="reviewTest()">查看答卷</button>
+    <button class="btn btn-primary" onclick="startMode()">重新测验</button>
+  `;
+
+  $('#progress-fill').style.width = '100%';
+  $('#progress-text').textContent = '';
+  $('#mode-label').textContent = '测验结果';
+  $('#sidebar-grid').innerHTML = '';
+}
+
+function reviewTest() {
+  testSubmitted = true;
+  currentIndex = 0;
+  renderQuestion();
+  updateProgress();
+  renderSidebar();
+  $('#mode-label').textContent = '查看答卷';
+}
+
+function finishPractice() {
+  clearUnitProgress(unitId);
+  let correct = 0;
+  let answered = 0;
+  questions.forEach(q => {
+    if (submittedQuestions[q.id]) {
+      answered++;
+      if (isAnswerCorrect(userAnswers[q.id], getRealAns(q))) correct++;
+    }
+  });
+
+  $('#content-area').innerHTML = `
+    <div class="result-card">
+      <h2>练习完成！</h2>
+      <div class="result-score">${correct}<span style="font-size:1.5rem"> / ${answered}</span></div>
+      <span class="score-badge ${getScoreGrade(answered>0?Math.round(correct/answered*100):0).cls}">已答 ${answered} 题，正确 ${correct} 题</span>
+      <div class="result-detail">
+        <div class="result-item"><div class="num" style="color:#2E7D32">${correct}</div><div class="label">正确</div></div>
+        <div class="result-item"><div class="num" style="color:#C62828">${answered-correct}</div><div class="label">错误</div></div>
+        <div class="result-item"><div class="num">${questions.length-answered}</div><div class="label">未答</div></div>
+      </div>
+    </div>
+  `;
+  $('#bottom-bar').innerHTML = '<button class="btn btn-primary" onclick="startMode()">重新练习</button>';
+  $('#progress-fill').style.width = '100%';
+  $('#progress-text').textContent = '';
+}
+
+// ====== Mode UI ======
+function updateModeUI() {
+  $$('.mode-btn').forEach(b => b.classList.remove('active'));
+  if (mode === 'practice') $('#btn-practice').classList.add('active');
+  if (mode === 'test') $('#btn-test').classList.add('active');
+  if (mode === 'wrong') $('#btn-wrong').classList.add('active');
+  const labels = { practice: '练习模式 — 选择后提交查看对错', test: '单元测验 — 全部答完后交卷出分', wrong: '单元错题 — 针对性复习' };
+  $('#mode-label').textContent = labels[mode];
+}
+
+$$('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    mode = this.dataset.mode;
+    startMode();
+  });
+});
+
+// ====== Keyboard ======
+document.addEventListener('keydown', function(e) {
+  if (testSubmitted && (mode === 'practice' || mode === 'wrong')) return;
+
+  const q = questions[currentIndex];
+  const submitted = submittedQuestions[q.id];
+  const maxOpts = getDisplayOpts(q).length;
+  const keyNum = parseInt(e.key);
+
+  // Number keys select option
+  if (keyNum >= 1 && keyNum <= maxOpts && !submitted) {
+    handleSelect(keyNum - 1, q.type === 'multi');
+    return;
+  }
+
+  // Enter key submits
+  if (e.key === 'Enter' && !submitted) {
+    e.preventDefault();
+    submitCurrent();
+    return;
+  }
+
+  if (e.key === 'ArrowRight') { e.preventDefault(); nextQuestion(); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); prevQuestion(); }
+  if (e.key === 's' && mode === 'test' && !testSubmitted) { e.preventDefault(); markSkip(); }
+});
+
+// ====== Auto-save progress ======
+function autoSave() {
+  if (questions.length === 0) return;
+  saveUnitProgress(unitId, {
+    mode, userAnswers, submittedQuestions, skippedQuestions,
+    currentIndex, testStarted, testSubmitted, timerSeconds
+  });
+}
+
+// ====== Start ======
+const savedProgress = loadUnitProgress(unitId);
+if (savedProgress && savedProgress.userAnswers && Object.keys(savedProgress.userAnswers).length > 0) {
+  // Restore saved progress
+  mode = savedProgress.mode || 'practice';
+  userAnswers = savedProgress.userAnswers || {};
+  submittedQuestions = savedProgress.submittedQuestions || {};
+  skippedQuestions = savedProgress.skippedQuestions || {};
+  currentIndex = savedProgress.currentIndex || 0;
+  testStarted = savedProgress.testStarted || false;
+  testSubmitted = savedProgress.testSubmitted || false;
+  timerSeconds = savedProgress.timerSeconds || 0;
+  updateModeUI();
+  questions = getQuestions();
+  if (currentIndex >= questions.length) currentIndex = questions.length - 1;
+  if (testStarted && !testSubmitted) {
+    startTimer(timerSeconds);
+    updateTimerDisplay();
+    $('#timer').style.display = 'flex';
+  }
+  renderQuestion();
+  updateProgress();
+  renderSidebar();
+} else {
+  startMode();
+}
+</script>
+</body>
+</html>
