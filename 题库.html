@@ -58,6 +58,33 @@ body {
   margin-top: 4px;
 }
 
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 16px;
+}
+
+.header-toggle {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+.header-toggle:hover { background: rgba(255,255,255,0.35); }
+
+.app-header.collapsed { padding: 6px 0; }
+.app-header.collapsed h1 { font-size: 1rem; }
+.app-header.collapsed .subtitle { display: none; }
+.app-header.collapsed .header-toggle { transform: rotate(180deg); }
+
 /* === Navigation === */
 .nav-bar {
   display: flex;
@@ -718,9 +745,14 @@ body {
 
 <!-- ====== HOME PAGE ====== -->
 <div id="pg-home">
-<header class="app-header">
-  <h1>习思想题库</h1>
-  <div class="subtitle">习近平新时代中国特色社会主义思想 · 学习自测系统</div>
+<header class="app-header" id="home-header">
+  <div class="header-content">
+    <div>
+      <h1>习思想题库</h1>
+      <div class="subtitle">习近平新时代中国特色社会主义思想 · 学习自测系统</div>
+    </div>
+    <button class="header-toggle" onclick="toggleHeader('home-header')" title="收缩标题栏">▲</button>
+  </div>
 </header>
 <div class="container">
   <div style="text-align:center;padding:12px 0 4px;color:#666;font-size:0.9rem">
@@ -744,9 +776,14 @@ body {
 
 <!-- ====== UNIT PAGE ====== -->
 <div id="pg-unit" style="display:none">
-<header class="app-header">
-  <h1 id="unit-title">单元练习</h1>
-  <div class="subtitle" id="u-mode-label">练习模式 — 选择后提交查看对错</div>
+<header class="app-header" id="unit-header">
+  <div class="header-content">
+    <div>
+      <h1 id="unit-title">单元练习</h1>
+      <div class="subtitle" id="u-mode-label">练习模式 — 选择后提交查看对错</div>
+    </div>
+    <button class="header-toggle" onclick="toggleHeader('unit-header')" title="收缩标题栏">▲</button>
+  </div>
 </header>
 <nav class="nav-bar">
   <button class="nav-back" onclick="goHome()">← 返回首页</button>
@@ -783,9 +820,14 @@ body {
 
 <!-- ====== WRONG BOOK PAGE ====== -->
 <div id="pg-wrong" style="display:none">
-<header class="app-header">
-  <h1>全部错题本</h1>
-  <div class="subtitle">跨单元错题汇总</div>
+<header class="app-header" id="wrong-header">
+  <div class="header-content">
+    <div>
+      <h1>全部错题本</h1>
+      <div class="subtitle">跨单元错题汇总</div>
+    </div>
+    <button class="header-toggle" onclick="toggleHeader('wrong-header')" title="收缩标题栏">▲</button>
+  </div>
 </header>
 <nav class="nav-bar">
   <button class="nav-back" onclick="goHome()">← 返回首页</button>
@@ -1423,6 +1465,62 @@ function findUnit(uid) {
   return UNITS.find(function(u) { return u.id === uid; }) ||
          (typeof VIP_UNITS !== 'undefined' ? VIP_UNITS.find(function(u) { return u.id === uid; }) : undefined);
 }
+
+// ====== Collapsible Header ======
+function toggleHeader(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('collapsed');
+  try { localStorage.setItem('header_' + id, el.classList.contains('collapsed') ? '1' : '0'); } catch(e) {}
+}
+// Restore header state on load
+(function() {
+  ['home-header','unit-header','wrong-header'].forEach(function(id) {
+    try {
+      if (localStorage.getItem('header_' + id) === '1') {
+        var el = document.getElementById(id);
+        if (el) el.classList.add('collapsed');
+      }
+    } catch(e) {}
+  });
+})();
+
+// ====== VIP Password Gate ======
+var VIP_PASSWORD = '1739819660';
+var VIP_UNLOCKED_KEY = 'xisixiang_vip_unlocked';
+
+function isVipUnit(uid) {
+  return uid >= 12;
+}
+
+function isVipUnlocked() {
+  try { return localStorage.getItem(VIP_UNLOCKED_KEY) === '1'; } catch(e) { return false; }
+}
+
+function unlockVip() {
+  try { localStorage.setItem(VIP_UNLOCKED_KEY, '1'); } catch(e) {}
+}
+
+function promptVipPassword(callback) {
+  var pwd = prompt('🔒 VIP套题需要输入访问密码：');
+  if (pwd === VIP_PASSWORD) {
+    unlockVip();
+    alert('✅ 密码正确，已解锁VIP套题！');
+    callback();
+  } else if (pwd !== null) {
+    alert('❌ 密码错误，请重试。');
+  }
+}
+
+// Override goUnit to check VIP access
+var _goUnit = goUnit;
+goUnit = function(uid) {
+  if (isVipUnit(uid) && !isVipUnlocked()) {
+    promptVipPassword(function() { _goUnit(uid); });
+  } else {
+    _goUnit(uid);
+  }
+};
 
 // Hash routing
 window.addEventListener('hashchange', function() {

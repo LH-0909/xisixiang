@@ -19,6 +19,62 @@ function findUnit(uid) {
          (typeof VIP_UNITS !== 'undefined' ? VIP_UNITS.find(function(u) { return u.id === uid; }) : undefined);
 }
 
+// ====== Collapsible Header ======
+function toggleHeader(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('collapsed');
+  try { localStorage.setItem('header_' + id, el.classList.contains('collapsed') ? '1' : '0'); } catch(e) {}
+}
+// Restore header state on load
+(function() {
+  ['home-header','unit-header','wrong-header'].forEach(function(id) {
+    try {
+      if (localStorage.getItem('header_' + id) === '1') {
+        var el = document.getElementById(id);
+        if (el) el.classList.add('collapsed');
+      }
+    } catch(e) {}
+  });
+})();
+
+// ====== VIP Password Gate ======
+var VIP_PASSWORD = '1739819660';
+var VIP_UNLOCKED_KEY = 'xisixiang_vip_unlocked';
+
+function isVipUnit(uid) {
+  return uid >= 12;
+}
+
+function isVipUnlocked() {
+  try { return localStorage.getItem(VIP_UNLOCKED_KEY) === '1'; } catch(e) { return false; }
+}
+
+function unlockVip() {
+  try { localStorage.setItem(VIP_UNLOCKED_KEY, '1'); } catch(e) {}
+}
+
+function promptVipPassword(callback) {
+  var pwd = prompt('🔒 VIP套题需要输入访问密码：');
+  if (pwd === VIP_PASSWORD) {
+    unlockVip();
+    alert('✅ 密码正确，已解锁VIP套题！');
+    callback();
+  } else if (pwd !== null) {
+    alert('❌ 密码错误，请重试。');
+  }
+}
+
+// Override goUnit to check VIP access
+var _goUnit = goUnit;
+goUnit = function(uid) {
+  if (isVipUnit(uid) && !isVipUnlocked()) {
+    promptVipPassword(function() { _goUnit(uid); });
+  } else {
+    _goUnit(uid);
+  }
+};
+
 // Hash routing
 window.addEventListener('hashchange', function() {
   var h = location.hash;

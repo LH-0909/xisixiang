@@ -51,6 +51,33 @@ body {
   margin-top: 4px;
 }
 
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 16px;
+}
+
+.header-toggle {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+.header-toggle:hover { background: rgba(255,255,255,0.35); }
+
+.app-header.collapsed { padding: 6px 0; }
+.app-header.collapsed h1 { font-size: 1rem; }
+.app-header.collapsed .subtitle { display: none; }
+.app-header.collapsed .header-toggle { transform: rotate(180deg); }
+
 /* === Navigation === */
 .nav-bar {
   display: flex;

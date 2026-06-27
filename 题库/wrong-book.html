@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>习思想题库 - 错题本</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <h1>全部错题本</h1>
+  <div class="subtitle" id="mode-label">跨单元错题汇总</div>
+</header>
+
+<nav class="nav-bar">
+  <a href="index.html" class="nav-back">← 返回首页</a>
+  <span style="flex:1"></span>
+  <button class="btn btn-sm btn-danger" id="btn-clear" style="display:none" onclick="clearAllWrong()">清空全部错题</button>
+</nav>
+
+<div class="container">
+  <div class="mode-select">
+    <button class="mode-btn active" data-mode="list" id="btn-list">
+      <span class="icon">📋</span> 错题列表
+    </button>
+    <button class="mode-btn" data-mode="review" id="btn-review">
+      <span class="icon">📝</span> 逐题复习
+    </button>
+  </div>
+
+  <div id="list-view"></div>
+
+  <!-- Review view with sidebar -->
+  <div id="review-view" style="display:none">
+    <div style="display:flex;gap:20px">
+      <aside class="sidebar" id="review-sidebar" style="position:static;max-height:70vh">
+        <div class="sidebar-toggle" onclick="toggleReviewSidebar()">
+          <span>📋 导航</span><span id="rs-arrow">◀</span>
+        </div>
+        <div class="sidebar-grid" id="review-sidebar-grid"></div>
+        <div class="sidebar-legend">
+          <span><span class="legend-dot cur"></span>当前</span>
+          <span><span class="legend-dot ans"></span>已答</span>
+        </div>
+      </aside>
+      <div style="flex:1;min-width:0">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        <div class="progress-text" id="progress-text"></div>
+        <div id="review-content"></div>
+        <div class="bottom-bar" id="review-bottom"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+let mode = 'list';
+let reviewQuestions = [];
+let reviewIndex = 0;
+let reviewAnswered = {};
+let reviewSkipped = {};
+let rsCollapsed = false;
+
+function toggleReviewSidebar() {
+  rsCollapsed = !rsCollapsed;
+  const sb = document.getElementById('review-sidebar');
+  if (rsCollapsed) { sb.classList.add('collapsed'); document.getElementById('rs-arrow').textContent = '▶'; }
+  else { sb.classList.remove('collapsed'); document.getElementById('rs-arrow').textContent = '◀'; }
+}
+
+function buildReviewSet() {
+  const allWrong = getAllWrongQuestions();
+  const result = [];
+  allWrong.forEach(w => {
+    const unit = UNITS.find(u => u.id === w.unitId);
+    if (!unit) return;
+    const q = unit.questions.find(q => q.id === w.questionId);
+    if (q) {
+      const shuffled = shuffleReviewOpts(q);
+      result.push({
+        ...q,
+        unitId: w.unitId,
+        unitName: unit.name,
+        wrongCount: w.wrongCount,
+        shuffledOpts: shuffled.opts,
+        _shuffledAns: shuffled.ans
+      });
+    }
+  });
+  return shuffle(result);
+}
+
+function shuffleReviewOpts(q) {
+  const indices = q.opts.map((_, i) => i);
+  const s = shuffle(indices);
+  const newOpts = s.map(i => q.opts[i]);
+  const newAns = Array.isArray(q.ans)
+    ? q.ans.map(a => s.indexOf(a)).sort((a,b)=>a-b)
+    : s.indexOf(q.ans);
+  return { opts: newOpts, ans: newAns };
+}
+
+function getReviewRealAns(q) { return q._shuffledAns; }
+function getReviewOpts(q) { return q.shuffledOpts || q.opts; }
+
+// ====== List View ======
+function renderListView() {
+  const allWrong = getAllWrongQuestions();
+  if (allWrong.length === 0) {
+    $('#list-view').innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>恭喜！没有错题</p><p style="color:#999;font-size:0.9rem">继续加油！</p></div>';
+    $('#btn-clear').style.display = 'none';
+    return;
+  }
+  $('#btn-clear').style.display = 'inline-flex';
+
+  const grouped = {};
+  allWrong.forEach(w => {
+    const unit = UNITS.find(u => u.id === w.unitId);
+    const unitName = unit ? unit.name : '未知';
+    if (!grouped[unitName]) grouped[unitName] = [];
+    const q = unit ? unit.questions.find(q => q.id === w.questionId) : null;
+    grouped[unitName].push({ ...w, questionText: q ? q.q : '(已删除)', unitName });
+  });
+
+  let html = '';
+  for (const [unitName, items] of Object.entries(grouped)) {
+    html += `<h3 style="margin:20px 0 10px;color:#8B0000">📌 ${unitName} (${items.length}题)</h3><div class="wrong-list">`;
+    items.forEach(item => {
+      const shortQ = item.questionText.length > 50 ? item.questionText.substring(0, 50) + '...' : item.questionText;
+      html += `<div class="wrong-item">
+        <span class="w-icon">❌</span>
+        <div class="w-info"><div class="w-title" title="${item.questionText.replace(/"/g,'&quot;')}">${shortQ}</div>
+        <div class="w-meta">${item.unitName}</div></div>
+        <span class="w-count">错${item.wrongCount}次</span></div>`;
+    });
+    html += '</div>';
+  }
+  $('#list-view').innerHTML = html;
+}
+
+// ====== Review View ======
+function startReview() {
+  reviewQuestions = buildReviewSet();
+  reviewIndex = 0;
+  reviewAnswered = {};
+  reviewSkipped = {};
+  if (reviewQuestions.length === 0) {
+    $('#review-content').innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>没有错题可复习！</p></div>';
+    $('#review-bottom').innerHTML = '';
+    $('#review-sidebar-grid').innerHTML = '';
+    return;
+  }
+  renderReviewQuestion();
+  updateReviewProgress();
+  renderReviewSidebar();
+}
+
+function renderReviewSidebar() {
+  const grid = $('#review-sidebar-grid');
+  if (!grid) return;
+  let html = '';
+  for (let i = 0; i < reviewQuestions.length; i++) {
+    let cls = 'sidebar-num';
+    if (i === reviewIndex) cls += ' current';
+    else if (reviewAnswered[reviewQuestions[i].id] !== undefined) cls += ' answered';
+    html += `<div class="${cls}" onclick="jumpReview(${i})" title="第${i+1}题">${i+1}</div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function jumpReview(index) {
+  reviewIndex = index;
+  renderReviewQuestion();
+  updateReviewProgress();
+  renderReviewSidebar();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderReviewQuestion() {
+  const q = reviewQuestions[reviewIndex];
+  const opts = getReviewOpts(q);
+  const realAns = getReviewRealAns(q);
+  const isMulti = q.type === 'multi';
+  const userAns = reviewAnswered[q.id];
+  const showResult = userAns !== undefined;
+  const letters = 'ABCDEFGHIJ'.split('');
+
+  const typeLabel = isMulti ? '<span class="type-badge multi">多选</span>' : '<span class="type-badge single">单选</span>';
+
+  let html = `<div class="question-card">
+    <span class="question-num">第 ${reviewIndex+1} 题</span>${typeLabel}
+    <span style="margin-left:8px;color:#999;font-size:0.85rem">${q.unitName} · 错过${q.wrongCount}次</span>
+    <div class="question-text">${q.q}</div>
+    <div style="font-size:0.85rem;color:#999;margin-bottom:8px">${isMulti?'（可多选）':'（单选）'}</div>
+    <div class="options-list">`;
+
+  opts.forEach((opt, i) => {
+    let isSelected = Array.isArray(userAns) ? userAns.includes(i) : (userAns === i);
+    let isCorrect = Array.isArray(realAns) ? realAns.includes(i) : (realAns === i);
+    let cls = 'option-item';
+    if (showResult) {
+      cls += ' disabled';
+      if (isCorrect) cls += ' correct';
+      else if (isSelected && !isCorrect) cls += ' wrong';
+    } else if (isSelected) cls += ' selected';
+
+    const checkHTML = isMulti
+      ? `<span class="checkmark"></span>`
+      : `<span class="option-letter">${letters[i]}</span>`;
+
+    html += `<div class="${cls}" data-idx="${i}">${checkHTML}<span class="option-text">${opt}</span></div>`;
+  });
+
+  html += '</div>';
+  if (showResult) {
+    if (isAnswerCorrect2(userAns, realAns)) {
+      html += '<div class="feedback correct-fb show">✅ 回答正确！已从错题本移除</div>';
+    } else {
+      let correctStr = Array.isArray(realAns)
+        ? realAns.map(a => letters[a]+'. '+opts[a]).join('；')
+        : letters[realAns]+'. '+opts[realAns];
+      html += `<div class="feedback wrong-fb show">❌ 回答错误！正确答案：<strong>${correctStr}</strong></div>`;
+    }
+  }
+  html += '</div>';
+  $('#review-content').innerHTML = html;
+
+  if (!showResult) {
+    document.querySelectorAll('#review-content .option-item').forEach(item => {
+      item.addEventListener('click', function() {
+        handleReviewAnswer(parseInt(this.dataset.idx), isMulti);
+      });
+    });
+  }
+  renderReviewBottom();
+}
+
+function isAnswerCorrect2(uAns, rAns) {
+  if (uAns === undefined) return false;
+  if (Array.isArray(rAns) && Array.isArray(uAns)) {
+    if (rAns.length !== uAns.length) return false;
+    const s = [...uAns].sort((a,b)=>a-b);
+    return rAns.every((v,i) => v === s[i]);
+  }
+  if (!Array.isArray(rAns) && !Array.isArray(uAns)) return uAns === rAns;
+  return false;
+}
+
+function handleReviewAnswer(optionIndex, isMulti) {
+  const q = reviewQuestions[reviewIndex];
+  const realAns = getReviewRealAns(q);
+
+  if (isMulti) {
+    let cur = reviewAnswered[q.id];
+    if (!Array.isArray(cur)) cur = [];
+    const idx = cur.indexOf(optionIndex);
+    if (idx >= 0) cur.splice(idx, 1); else cur.push(optionIndex);
+    cur.sort((a,b)=>a-b);
+    reviewAnswered[q.id] = cur;
+    renderReviewQuestion();
+    renderReviewSidebar();
+    return;
+  }
+
+  reviewAnswered[q.id] = optionIndex;
+  if (isAnswerCorrect2(optionIndex, realAns)) {
+    removeWrongQuestion(q.unitId, q.id);
+    refreshReviewSet();
+  } else {
+    addWrongQuestion(q.unitId, q.id);
+  }
+  renderReviewQuestion();
+  renderReviewSidebar();
+}
+
+function refreshReviewSet() {
+  const oldLen = reviewQuestions.length;
+  reviewQuestions = buildReviewSet();
+  if (reviewQuestions.length === 0) {
+    $('#review-content').innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>全部错题已清除！</p></div>';
+    $('#review-bottom').innerHTML = '';
+    updateReviewProgress();
+    $('#review-sidebar-grid').innerHTML = '';
+    return;
+  }
+  if (reviewIndex >= reviewQuestions.length) reviewIndex = reviewQuestions.length - 1;
+}
+
+function renderReviewBottom() {
+  const q = reviewQuestions[reviewIndex];
+  const isAnswered = reviewAnswered[q.id] !== undefined;
+  const isLast = reviewIndex >= reviewQuestions.length - 1;
+  const isFirst = reviewIndex <= 0;
+
+  let html = `<button class="btn btn-outline" onclick="reviewPrev()" ${isFirst?'disabled':''}>← 上一题</button>
+    <span style="font-size:0.9rem;color:#666">${reviewIndex+1} / ${reviewQuestions.length}</span>`;
+  if (isLast) {
+    html += `<button class="btn btn-primary" onclick="finishReview()">完成 ✓</button>`;
+  } else {
+    html += `<button class="btn btn-primary" onclick="reviewNext()">下一题 →</button>`;
+  }
+  $('#review-bottom').innerHTML = html;
+}
+
+function reviewNext() {
+  if (reviewIndex < reviewQuestions.length - 1) {
+    reviewIndex++;
+    renderReviewQuestion();
+    updateReviewProgress();
+    renderReviewSidebar();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function reviewPrev() {
+  if (reviewIndex > 0) {
+    reviewIndex--;
+    renderReviewQuestion();
+    updateReviewProgress();
+    renderReviewSidebar();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function updateReviewProgress() {
+  if (reviewQuestions.length === 0) {
+    $('#progress-fill').style.width = '0%';
+    $('#progress-text').textContent = '';
+    return;
+  }
+  $('#progress-fill').style.width = Math.round((reviewIndex+1)/reviewQuestions.length*100) + '%';
+  $('#progress-text').textContent = `第 ${reviewIndex+1} 题 / 共 ${reviewQuestions.length} 题`;
+}
+
+function finishReview() {
+  const remaining = getAllWrongQuestions().length;
+  $('#review-content').innerHTML = `<div class="result-card">
+    <h2>复习完成！</h2>
+    <p style="margin:16px 0;font-size:1.2rem">剩余错题: <strong style="color:#C62828;font-size:2.5rem">${remaining}</strong> 道</p>
+    ${remaining===0?'<p style="color:#2E7D32;font-weight:600;font-size:1.1rem">🎉 全部掌握！</p>':'<p>继续加油！</p>'}</div>`;
+  $('#review-bottom').innerHTML = '<button class="btn btn-primary" onclick="startReview()">再次复习</button>';
+}
+
+// ====== Mode ======
+function switchMode(m) {
+  mode = m;
+  $$('.mode-btn').forEach(b => b.classList.remove('active'));
+  if (m === 'list') { $('#btn-list').classList.add('active'); $('#list-view').style.display='block'; $('#review-view').style.display='none'; renderListView(); }
+  else { $('#btn-review').classList.add('active'); $('#list-view').style.display='none'; $('#review-view').style.display='block'; startReview(); }
+}
+
+$('#btn-list').addEventListener('click', ()=>switchMode('list'));
+$('#btn-review').addEventListener('click', ()=>switchMode('review'));
+
+function clearAllWrong() {
+  if (confirm('确定清空所有错题记录？不可撤销。')) { localStorage.removeItem('xixiang_wrong_book'); renderListView(); }
+}
+
+document.addEventListener('keydown', function(e) {
+  if (mode === 'review') {
+    const q = reviewQuestions[reviewIndex];
+    const maxOpts = getReviewOpts(q).length;
+    const keyNum = parseInt(e.key);
+    if (keyNum >= 1 && keyNum <= maxOpts) { handleReviewAnswer(keyNum-1, q.type==='multi'); return; }
+    if (e.key === 'ArrowRight') { e.preventDefault(); reviewNext(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); reviewPrev(); }
+  }
+});
+
+renderListView();
+</script>
+</body>
+</html>

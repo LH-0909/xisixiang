@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>习思想题库</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <h1>习思想题库</h1>
+  <div class="subtitle">习近平新时代中国特色社会主义思想 · 学习自测系统</div>
+</header>
+
+<div class="container">
+  <div style="text-align:center;padding:12px 0 4px;color:#666;font-size:0.9rem">
+    共 <strong>11</strong> 个单元 · <strong id="total-count">--</strong> 道选择题 · 支持练习和测验模式
+  </div>
+
+  <div class="unit-grid" id="unit-grid"></div>
+
+  <div style="text-align:center;margin-top:16px">
+    <a href="wrong-book.html?unit=all" class="unit-card special" style="display:inline-block;min-width:200px">
+      <div class="unit-num">📋</div>
+      <div class="unit-title">全部错题本</div>
+      <div class="unit-count" id="wrong-count">查看所有单元的错题</div>
+    </a>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+// Count total questions
+let total = 0;
+UNITS.forEach(u => total += u.questions.length);
+$('#total-count').textContent = total;
+
+// Render unit cards
+const grid = $('#unit-grid');
+UNITS.forEach(unit => {
+  const card = document.createElement('a');
+  card.className = 'unit-card';
+  card.href = 'unit.html?unit=' + unit.id;
+  card.innerHTML = `
+    <div class="unit-num">${unit.id}</div>
+    <div class="unit-title">${unit.name}</div>
+    <div class="unit-count">${unit.questions.length} 道题</div>
+  `;
+  grid.appendChild(card);
+});
+
+// Update wrong count
+const allWrong = getAllWrongQuestions();
+const wc = $('#wrong-count');
+if (allWrong.length > 0) {
+  wc.textContent = allWrong.length + ' 道错题待复习';
+  wc.style.color = '#ff6b6b';
+} else {
+  wc.textContent = '暂无错题 ✓';
+}
+</script>
+
+</body>
+</html>
