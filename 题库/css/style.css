@@ -161,6 +161,14 @@ body {
   color: var(--text-light);
 }
 
+.unit-progress {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: #E65100;
+  font-weight: 600;
+}
+
 .unit-card.special {
   background: linear-gradient(135deg, var(--primary), var(--primary-light));
   color: #fff;
@@ -537,6 +545,45 @@ body {
 .legend-dot.skip { background: #FFF8E1; border: 1px solid #F9A825; }
 .legend-dot.unans { background: #fafafa; border: 1px solid var(--border); }
 
+/* === Section Header in Sidebar === */
+.sidebar-section {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  padding: 8px 0 2px;
+  margin-top: 4px;
+  border-top: 1px dashed var(--border);
+  text-align: center;
+}
+
+.sidebar-section:first-child {
+  border-top: none;
+  margin-top: 0;
+}
+
+/* === Section Info Bar === */
+.section-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  margin-bottom: 12px;
+  background: var(--card-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.section-info .section-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
 /* === Multi-select checkmark === */
 .option-item .checkmark {
   width: 20px; height: 20px;
@@ -588,6 +635,7 @@ body {
 
 .type-badge.single { background: #E3F2FD; color: #1565C0; }
 .type-badge.multi { background: #FCE4EC; color: #C62828; }
+.type-badge.judge { background: #E8F5E9; color: #2E7D32; }
 
 /* === Sidebar responsive === */
 @media (max-width: 768px) {

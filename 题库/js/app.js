@@ -4,6 +4,7 @@
 
 const STORAGE_KEY = 'xixiang_wrong_book';
 const HISTORY_KEY = 'xixiang_test_history';
+const PROGRESS_PREFIX = 'xixiang_unit_progress_';
 
 function getWrongBook() {
   try {
@@ -117,4 +118,45 @@ function getScoreGrade(percent) {
   if (percent >= 70) return { text: '良好', cls: 'good' };
   if (percent >= 60) return { text: '及格', cls: 'poor' };
   return { text: '需努力', cls: 'poor' };
+}
+
+// ====== 单元做题进度持久化 ======
+
+function saveUnitProgress(unitId, data) {
+  try {
+    const key = PROGRESS_PREFIX + unitId;
+    const toSave = {
+      mode: data.mode,
+      userAnswers: data.userAnswers,
+      submittedQuestions: data.submittedQuestions,
+      skippedQuestions: data.skippedQuestions,
+      currentIndex: data.currentIndex,
+      testStarted: data.testStarted || false,
+      testSubmitted: data.testSubmitted || false,
+      timerSeconds: data.timerSeconds || 0,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(key, JSON.stringify(toSave));
+  } catch(e) {}
+}
+
+function loadUnitProgress(unitId) {
+  try {
+    const key = PROGRESS_PREFIX + unitId;
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) {
+    return null;
+  }
+}
+
+function clearUnitProgress(unitId) {
+  try {
+    localStorage.removeItem(PROGRESS_PREFIX + unitId);
+  } catch(e) {}
+}
+
+function hasUnitProgress(unitId) {
+  return loadUnitProgress(unitId) !== null;
 }
