@@ -24,6 +24,11 @@ function toggleHeader(id) {
   var el = document.getElementById(id);
   if (!el) return;
   el.classList.toggle('collapsed');
+  // Also toggle the next nav-bar
+  var nav = el.nextElementSibling;
+  if (nav && nav.classList.contains('nav-bar')) {
+    nav.classList.toggle('collapsed');
+  }
   try { localStorage.setItem('header_' + id, el.classList.contains('collapsed') ? '1' : '0'); } catch(e) {}
 }
 // Restore header state on load
@@ -32,7 +37,11 @@ function toggleHeader(id) {
     try {
       if (localStorage.getItem('header_' + id) === '1') {
         var el = document.getElementById(id);
-        if (el) el.classList.add('collapsed');
+        if (el) {
+          el.classList.add('collapsed');
+          var nav = el.nextElementSibling;
+          if (nav && nav.classList.contains('nav-bar')) nav.classList.add('collapsed');
+        }
       }
     } catch(e) {}
   });

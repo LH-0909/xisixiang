@@ -91,6 +91,8 @@ body {
   z-index: 99;
 }
 
+.nav-bar.collapsed { display: none; }
+
 .nav-back {
   color: var(--primary);
   text-decoration: none;
