@@ -499,7 +499,7 @@ body {
   user-select: none;
 }
 
-.sidebar.collapsed .sidebar-toggle span { display: none; }
+.sidebar.collapsed .sidebar-label { display: none; }
 .sidebar.collapsed .sidebar-grid { display: none; }
 
 .sidebar-grid {
