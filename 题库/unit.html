@@ -8,12 +8,15 @@
 </head>
 <body>
 
-<header class="app-header">
-  <h1 id="unit-title">单元练习</h1>
+<header class="app-header" id="app-header">
+  <div class="header-content">
+    <h1 id="unit-title">单元练习</h1>
+    <button class="header-toggle" onclick="toggleHeader()" title="收缩标题栏">▲</button>
+  </div>
   <div class="subtitle" id="mode-label">练习模式</div>
 </header>
 
-<nav class="nav-bar">
+<nav class="nav-bar" id="nav-bar">
   <a href="index.html" class="nav-back">← 返回首页</a>
   <span style="flex:1"></span>
   <span class="timer" id="timer" style="display:none">⏱ 00:00</span>
@@ -80,6 +83,14 @@ let sidebarCollapsed = false;
 
 $('#unit-title').textContent = unit.name;
 updateModeUI();
+
+// ====== Header collapse ======
+function toggleHeader() {
+  const header = $('#app-header');
+  const nav = $('#nav-bar');
+  const collapsed = header.classList.toggle('collapsed');
+  if (nav) nav.classList.toggle('collapsed', collapsed);
+}
 
 // ====== Sidebar ======
 function toggleSidebar() {

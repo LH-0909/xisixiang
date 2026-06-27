@@ -8,12 +8,15 @@
 </head>
 <body>
 
-<header class="app-header">
-  <h1>全部错题本</h1>
+<header class="app-header" id="app-header">
+  <div class="header-content">
+    <h1>全部错题本</h1>
+    <button class="header-toggle" onclick="toggleHeader()" title="收缩标题栏">▲</button>
+  </div>
   <div class="subtitle" id="mode-label">跨单元错题汇总</div>
 </header>
 
-<nav class="nav-bar">
+<nav class="nav-bar" id="nav-bar">
   <a href="index.html" class="nav-back">← 返回首页</a>
   <span style="flex:1"></span>
   <button class="btn btn-sm btn-danger" id="btn-clear" style="display:none" onclick="clearAllWrong()">清空全部错题</button>
@@ -57,6 +60,13 @@
 <script src="js/data.js"></script>
 <script src="js/app.js"></script>
 <script>
+function toggleHeader() {
+  const header = document.getElementById('app-header');
+  const nav = document.getElementById('nav-bar');
+  const collapsed = header.classList.toggle('collapsed');
+  if (nav) nav.classList.toggle('collapsed', collapsed);
+}
+
 let mode = 'list';
 let reviewQuestions = [];
 let reviewIndex = 0;
