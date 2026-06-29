@@ -19,6 +19,9 @@
 <nav class="nav-bar" id="nav-bar">
   <a href="index.html" class="nav-back">← 返回首页</a>
   <span style="flex:1"></span>
+  <button class="btn btn-sm btn-outline" id="btn-export" style="display:none" onclick="exportWrongBook()" title="导出为JSON文件">📥 导出</button>
+  <button class="btn btn-sm btn-outline" onclick="document.getElementById('import-file').click()" title="从JSON文件导入">📤 导入</button>
+  <input type="file" id="import-file" accept=".json" style="display:none" onchange="importWrongBook(this)">
   <button class="btn btn-sm btn-danger" id="btn-clear" style="display:none" onclick="clearAllWrong()">清空全部错题</button>
 </nav>
 
@@ -58,8 +61,10 @@
 </div>
 
 <script src="js/data.js"></script>
+<script src="js/lib.js"></script>
+<script src="js/storage.js"></script>
 <script src="js/app.js"></script>
-<script src="vip_data.js"></script>
+<script src="js/vip_data.js"></script>
 <script>
 function toggleHeader() {
   const header = document.getElementById('app-header');
@@ -72,6 +77,7 @@ let mode = 'list';
 let reviewQuestions = [];
 let reviewIndex = 0;
 let reviewAnswered = {};
+let reviewSubmitted = {};
 let reviewSkipped = {};
 let rsCollapsed = false;
 
@@ -90,7 +96,7 @@ function buildReviewSet() {
     if (!unit) return;
     const q = unit.questions.find(q => q.id === w.questionId);
     if (q) {
-      const shuffled = shuffleReviewOpts(q);
+      var shuffled = shuffleOptions(q);
       result.push({
         ...q,
         unitId: w.unitId,
@@ -104,16 +110,6 @@ function buildReviewSet() {
   return shuffle(result);
 }
 
-function shuffleReviewOpts(q) {
-  const indices = q.opts.map((_, i) => i);
-  const s = shuffle(indices);
-  const newOpts = s.map(i => q.opts[i]);
-  const newAns = Array.isArray(q.ans)
-    ? q.ans.map(a => s.indexOf(a)).sort((a,b)=>a-b)
-    : s.indexOf(q.ans);
-  return { opts: newOpts, ans: newAns };
-}
-
 function getReviewRealAns(q) { return q._shuffledAns; }
 function getReviewOpts(q) { return q.shuffledOpts || q.opts; }
 
@@ -123,17 +119,21 @@ function renderListView() {
   if (allWrong.length === 0) {
     $('#list-view').innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>恭喜！没有错题</p><p style="color:#999;font-size:0.9rem">继续加油！</p></div>';
     $('#btn-clear').style.display = 'none';
+    $('#btn-export').style.display = 'none';
     return;
   }
   $('#btn-clear').style.display = 'inline-flex';
+  $('#btn-export').style.display = 'inline-flex';
 
   const grouped = {};
+  var orphanCount = 0;
   allWrong.forEach(w => {
     const unit = findUnit(w.unitId);
-    const unitName = unit ? unit.name : '未知';
+    const unitName = unit ? unit.name : '(单元已移除)';
+    if (!unit) orphanCount++;
     if (!grouped[unitName]) grouped[unitName] = [];
     const q = unit ? unit.questions.find(q => q.id === w.questionId) : null;
-    grouped[unitName].push({ ...w, questionText: q ? q.q : '(已删除)', unitName });
+    grouped[unitName].push({ ...w, questionText: q ? q.q : (unit ? '(题目已移除)' : '(题目已移除)'), unitName, isOrphan: !unit });
   });
 
   let html = '';
@@ -149,6 +149,9 @@ function renderListView() {
     });
     html += '</div>';
   }
+  if (orphanCount > 0) {
+    html += '<div style="text-align:center;margin-top:16px;padding:12px;background:#FFF8E1;border-radius:8px;font-size:0.85rem;color:#F57F17">⚠️ 有 ' + orphanCount + ' 条错题记录对应的单元已移除。<br><button class="btn btn-sm btn-outline" onclick="clearOrphanWrong()" style="margin-top:8px">🗑 清除失效条目</button></div>';
+  }
   $('#list-view').innerHTML = html;
 }
 
@@ -157,6 +160,7 @@ function startReview() {
   reviewQuestions = buildReviewSet();
   reviewIndex = 0;
   reviewAnswered = {};
+  reviewSubmitted = {};
   reviewSkipped = {};
   if (reviewQuestions.length === 0) {
     $('#review-content').innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>没有错题可复习！</p></div>';
@@ -176,7 +180,7 @@ function renderReviewSidebar() {
   for (let i = 0; i < reviewQuestions.length; i++) {
     let cls = 'sidebar-num';
     if (i === reviewIndex) cls += ' current';
-    else if (reviewAnswered[reviewQuestions[i].id] !== undefined) cls += ' answered';
+    else if (reviewSubmitted[reviewQuestions[i].id]) cls += ' answered';
     html += `<div class="${cls}" onclick="jumpReview(${i})" title="第${i+1}题">${i+1}</div>`;
   }
   grid.innerHTML = html;
@@ -197,7 +201,8 @@ function renderReviewQuestion() {
   const isMulti = q.type === 'multi';
   const isJudge = q.type === 'judge';
   const userAns = reviewAnswered[q.id];
-  const showResult = userAns !== undefined;
+  const isSubmitted = reviewSubmitted[q.id] === true;
+  const showResult = isMulti ? isSubmitted : (userAns !== undefined);
   const letters = 'ABCDEFGHIJ'.split('');
 
   let typeLabel;
@@ -231,7 +236,7 @@ function renderReviewQuestion() {
 
   html += '</div>';
   if (showResult) {
-    if (isAnswerCorrect2(userAns, realAns)) {
+    if (isAnswerCorrect(userAns, realAns)) {
       html += '<div class="feedback correct-fb show">✅ 回答正确！已从错题本移除</div>';
     } else {
       let correctStr = Array.isArray(realAns)
@@ -253,17 +258,6 @@ function renderReviewQuestion() {
   renderReviewBottom();
 }
 
-function isAnswerCorrect2(uAns, rAns) {
-  if (uAns === undefined) return false;
-  if (Array.isArray(rAns) && Array.isArray(uAns)) {
-    if (rAns.length !== uAns.length) return false;
-    const s = [...uAns].sort((a,b)=>a-b);
-    return rAns.every((v,i) => v === s[i]);
-  }
-  if (!Array.isArray(rAns) && !Array.isArray(uAns)) return uAns === rAns;
-  return false;
-}
-
 function handleReviewAnswer(optionIndex, isMulti) {
   const q = reviewQuestions[reviewIndex];
   const realAns = getReviewRealAns(q);
@@ -281,9 +275,29 @@ function handleReviewAnswer(optionIndex, isMulti) {
   }
 
   reviewAnswered[q.id] = optionIndex;
-  if (isAnswerCorrect2(optionIndex, realAns)) {
+  reviewSubmitted[q.id] = true;
+  if (isAnswerCorrect(optionIndex, realAns)) {
     removeWrongQuestion(q.unitId, q.id);
     refreshReviewSet();
+    return;
+  } else {
+    addWrongQuestion(q.unitId, q.id);
+  }
+  renderReviewQuestion();
+  renderReviewSidebar();
+}
+
+function submitReviewAnswer() {
+  const q = reviewQuestions[reviewIndex];
+  const userAns = reviewAnswered[q.id];
+  const realAns = getReviewRealAns(q);
+
+  reviewSubmitted[q.id] = true;
+
+  if (isAnswerCorrect(userAns, realAns)) {
+    removeWrongQuestion(q.unitId, q.id);
+    refreshReviewSet();
+    return;
   } else {
     addWrongQuestion(q.unitId, q.id);
   }
@@ -302,17 +316,27 @@ function refreshReviewSet() {
     return;
   }
   if (reviewIndex >= reviewQuestions.length) reviewIndex = reviewQuestions.length - 1;
+  renderReviewQuestion();
+  updateReviewProgress();
+  renderReviewSidebar();
 }
 
 function renderReviewBottom() {
   const q = reviewQuestions[reviewIndex];
-  const isAnswered = reviewAnswered[q.id] !== undefined;
+  const isMulti = q.type === 'multi';
+  const hasSelection = isMulti
+    ? (Array.isArray(reviewAnswered[q.id]) && reviewAnswered[q.id].length > 0)
+    : (reviewAnswered[q.id] !== undefined);
+  const isSubmitted = reviewSubmitted[q.id] === true;
   const isLast = reviewIndex >= reviewQuestions.length - 1;
   const isFirst = reviewIndex <= 0;
 
   let html = `<button class="btn btn-outline" onclick="reviewPrev()" ${isFirst?'disabled':''}>← 上一题</button>
     <span style="font-size:0.9rem;color:#666">${reviewIndex+1} / ${reviewQuestions.length}</span>`;
-  if (isLast) {
+
+  if (isMulti && hasSelection && !isSubmitted) {
+    html += `<button class="btn btn-primary" onclick="submitReviewAnswer()">提交答案 ✓</button>`;
+  } else if (isLast) {
     html += `<button class="btn btn-primary" onclick="finishReview()">完成 ✓</button>`;
   } else {
     html += `<button class="btn btn-primary" onclick="reviewNext()">下一题 →</button>`;
@@ -374,12 +398,89 @@ function clearAllWrong() {
   if (confirm('确定清空所有错题记录？不可撤销。')) { localStorage.removeItem('xixiang_wrong_book'); renderListView(); }
 }
 
+function clearOrphanWrong() {
+  var all = getAllWrongQuestions();
+  var removed = 0;
+  all.forEach(function(w) {
+    if (!findUnit(w.unitId)) {
+      removeWrongQuestion(w.unitId, w.questionId);
+      removed++;
+    }
+  });
+  if (removed > 0) { alert('已清除 ' + removed + ' 条失效记录。'); }
+  renderListView();
+}
+
+function exportWrongBook() {
+  var book = getWrongBook();
+  var exportData = {};
+  for (var k in book) {
+    if (k === '_meta') continue;
+    exportData[k] = book[k];
+  }
+  var blob = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '习思想_错题本_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importWrongBook(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if (typeof data !== 'object' || Array.isArray(data)) {
+        alert('❌ 文件格式不正确，请选择有效的错题本备份文件。');
+        return;
+      }
+      // Validate structure
+      var count = 0;
+      for (var k in data) {
+        var item = data[k];
+        if (!item.unitId || !item.questionId) {
+          alert('❌ 文件格式不正确，缺少必要字段。');
+          return;
+        }
+        count++;
+      }
+      if (!confirm('即将导入 ' + count + ' 条错题记录。\n注意：这会覆盖当前的错题本数据，确定继续？')) return;
+      // Merge with existing (additive import)
+      var current = getWrongBook();
+      for (var k in data) {
+        if (!current[k] || data[k].wrongCount > current[k].wrongCount) {
+          current[k] = data[k];
+        }
+      }
+      saveWrongBook(current);
+      alert('✅ 已成功导入 ' + count + ' 条错题记录。');
+      renderListView();
+    } catch(ex) {
+      alert('❌ 文件解析失败，请确认是有效的JSON文件。');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
 document.addEventListener('keydown', function(e) {
   if (mode === 'review') {
     const q = reviewQuestions[reviewIndex];
     const maxOpts = getReviewOpts(q).length;
     const keyNum = parseInt(e.key);
     if (keyNum >= 1 && keyNum <= maxOpts) { handleReviewAnswer(keyNum-1, q.type==='multi'); return; }
+    if (e.key === 'Enter' && q.type === 'multi') {
+      const hasSel = Array.isArray(reviewAnswered[q.id]) && reviewAnswered[q.id].length > 0;
+      if (hasSel && !reviewSubmitted[q.id]) {
+        e.preventDefault();
+        submitReviewAnswer();
+        return;
+      }
+    }
     if (e.key === 'ArrowRight') { e.preventDefault(); reviewNext(); }
     if (e.key === 'ArrowLeft') { e.preventDefault(); reviewPrev(); }
   }

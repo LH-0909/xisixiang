@@ -437,7 +437,7 @@ var unitPage = (function() {
 
 // ====== WRONG BOOK PAGE ======
 var wrongPage = (function() {
-  var wmode, wQs, wIdx, wAns, wSidebar;
+  var wmode, wQs, wIdx, wAns, wSubmitted, wSidebar;
 
   function start() {
     wmode = 'list'; wSidebar = false;
@@ -514,7 +514,7 @@ var wrongPage = (function() {
   }
 
   function startReview() {
-    wQs = buildQs(); wIdx = 0; wAns = {};
+    wQs = buildQs(); wIdx = 0; wAns = {}; wSubmitted = {};
     if (wQs.length === 0) {
       document.getElementById('w-review-content').innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>没有错题可复习！</p></div>';
       document.getElementById('w-review-bottom').innerHTML = '';
@@ -529,7 +529,7 @@ var wrongPage = (function() {
     for (var i = 0; i < wQs.length; i++) {
       var cls = 'sidebar-num';
       if (i === wIdx) cls += ' current';
-      else if (wAns[wQs[i].id] !== undefined) cls += ' answered';
+      else if (wSubmitted[wQs[i].id]) cls += ' answered';
       html += '<div class="' + cls + '" onclick="wrongPage.jump(' + i + ')">' + (i + 1) + '</div>';
     }
     document.getElementById('w-sidebar-grid').innerHTML = html;
@@ -539,7 +539,9 @@ var wrongPage = (function() {
 
   function renderWQ() {
     var q = wQs[wIdx], opts = q.shuffledOpts || q.opts, realAns = q._shuffledAns;
-    var isMulti = q.type === 'multi', userAns = wAns[q.id], showResult = userAns !== undefined;
+    var isMulti = q.type === 'multi', userAns = wAns[q.id];
+    var isSubmitted = wSubmitted[q.id] === true;
+    var showResult = isMulti ? isSubmitted : (userAns !== undefined);
     var letters = 'ABCDEFGHIJ';
 
     var html = '<div class="question-card"><span class="question-num">第 ' + (wIdx + 1) + ' 题</span>' +
@@ -593,7 +595,7 @@ var wrongPage = (function() {
       var idx = cur.indexOf(oi); if (idx >= 0) cur.splice(idx, 1); else cur.push(oi);
       cur.sort(function(a, b) { return a - b; }); wAns[q.id] = cur;
     } else {
-      wAns[q.id] = oi;
+      wAns[q.id] = oi; wSubmitted[q.id] = true;
       if (wIsCorrect(oi, ra)) {
         removeWrongQuestion(q.unitId, q.id);
         wQs = buildQs();
@@ -608,12 +610,38 @@ var wrongPage = (function() {
     renderWQ(); renderWSidebar();
   }
 
+  function submitWAnswer() {
+    var q = wQs[wIdx], userAns = wAns[q.id], ra = q._shuffledAns;
+    wSubmitted[q.id] = true;
+    if (wIsCorrect(userAns, ra)) {
+      removeWrongQuestion(q.unitId, q.id);
+      wQs = buildQs();
+      if (wQs.length === 0) {
+        document.getElementById('w-review-content').innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>全部错题已清除！</p></div>';
+        document.getElementById('w-review-bottom').innerHTML = ''; updateWProgress(); document.getElementById('w-sidebar-grid').innerHTML = '';
+        return;
+      }
+      if (wIdx >= wQs.length) wIdx = wQs.length - 1;
+    } else { addWrongQuestion(q.unitId, q.id); }
+    renderWQ(); renderWSidebar();
+  }
+
   function renderWBottom() {
+    var q = wQs[wIdx], isMulti = q.type === 'multi';
+    var hasSel = isMulti
+      ? (Array.isArray(wAns[q.id]) && wAns[q.id].length > 0)
+      : (wAns[q.id] !== undefined);
+    var isSubmitted = wSubmitted[q.id] === true;
     var isLast = wIdx >= wQs.length - 1;
     var html = '<button class="btn btn-outline" onclick="wrongPage.prev()" ' + (wIdx <= 0 ? 'disabled' : '') + '>← 上一题</button>';
     html += '<span style="font-size:0.9rem;color:#666">' + (wIdx + 1) + ' / ' + wQs.length + '</span>';
-    if (isLast) html += '<button class="btn btn-primary" onclick="wrongPage.finish()">完成 ✓</button>';
-    else html += '<button class="btn btn-primary" onclick="wrongPage.next()">下一题 →</button>';
+    if (isMulti && hasSel && !isSubmitted) {
+      html += '<button class="btn btn-primary" onclick="wrongPage.submitAnswer()">提交答案 ✓</button>';
+    } else if (isLast) {
+      html += '<button class="btn btn-primary" onclick="wrongPage.finish()">完成 ✓</button>';
+    } else {
+      html += '<button class="btn btn-primary" onclick="wrongPage.next()">下一题 →</button>';
+    }
     document.getElementById('w-review-bottom').innerHTML = html;
   }
 
@@ -641,7 +669,8 @@ var wrongPage = (function() {
     next: wNext, prev: wPrev,
     finish: wFinish,
     clearAll: clearAll,
-    startReview: startReview
+    startReview: startReview,
+    submitAnswer: submitWAnswer
   };
 })();
 
